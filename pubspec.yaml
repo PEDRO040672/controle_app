@@ -29,3 +29,7 @@ flutter:
 
   uses-material-design: true
 
+fonts:
+  - family: CourierNew
+    fonts:
+      - asset: assets/fonts/CourierNew.ttf

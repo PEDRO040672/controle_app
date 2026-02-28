@@ -17,7 +17,7 @@ class CadastroClientePage extends BaseFormPage {
 }
 
 class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
-  final PessoaService _service = PessoaService();
+  final PessoaServices _services = PessoaServices();
 
   final _codigoController = TextEditingController();
   final _nomeController = TextEditingController();
@@ -124,7 +124,7 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
     _iniciarCarregamento();
 
     try {
-      final pessoa = await _service.getById(codigo);
+      final pessoa = await _services.getById(codigo);
       if (!mounted) return;
 
       if (pessoa != null) {
@@ -169,9 +169,9 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
 
     try {
       if (codigo == 0) {
-        await _service.add(pessoa);
+        await _services.add(pessoa);
       } else {
-        await _service.update(pessoa);
+        await _services.update(pessoa);
       }
 
       if (!mounted) return;
@@ -197,7 +197,7 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
     _iniciarCarregamento();
 
     try {
-      await _service.delete(codigo);
+      await _services.delete(codigo);
       if (!mounted) return;
 
       await MSG(context, 'Aviso', 'Registro excluído com sucesso.', 1);

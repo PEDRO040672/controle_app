@@ -39,14 +39,14 @@ class Campo extends StatelessWidget {
   double _largura() {
     switch (tipo) {
       case TipoCampo.texto:
-        return tamanho * 14;
+        return tamanho * 18;
 
       case TipoCampo.inteiro:
-        return tamanho * 18;
+        return tamanho * 15;
 
       case TipoCampo.moeda:
       case TipoCampo.mascara:
-        return (mascara?.length ?? 10) * 16;
+        return (mascara?.length ?? 10) * 15;
 
       case TipoCampo.data:
         return 10 * 15; // 99/99/9999
@@ -163,7 +163,7 @@ class Campo extends StatelessWidget {
         style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          fontFamily: 'Courier', // exemplo: monospaced
+          fontFamily: 'CourierNew', // exemplo: monospaced
         ),
         maxLength: _maxLength(),
         keyboardType: _keyboard(),

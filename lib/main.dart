@@ -166,7 +166,7 @@ class _MenuPageState extends State<MenuPage> {
                 _Modulo(
                   id: 'cidades',
                   titulo: 'Cidades',
-                  widget: ForCid(onClose: () => _fecharModulo('cidades')),
+                  widget: ForCidPage(onClose: () => _fecharModulo('cidades')),
                 ),
               );
             },

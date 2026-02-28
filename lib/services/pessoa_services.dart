@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/pessoa_models.dart';
 import '../core/api_config.dart';
 
-class PessoaService {
+class PessoaServices {
   Future<List<Pessoa>> getAll() async {
     final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/pessoas'));
 
