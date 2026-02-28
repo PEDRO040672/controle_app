@@ -36,21 +36,35 @@ class Campo extends StatelessWidget {
   // ==========================
   // LARGURA DINÂMICA
   // ==========================
-  double _largura() {
+  double _largura(BuildContext context) {
+    final estilo = _estilo(context);
+
+    // Texto base para cálculo
+    String textoBase;
+
     switch (tipo) {
       case TipoCampo.texto:
-        return tamanho * 18;
-
       case TipoCampo.inteiro:
-        return tamanho * 15;
+        textoBase = 'W' * tamanho;
+        break;
 
       case TipoCampo.moeda:
       case TipoCampo.mascara:
-        return (mascara?.length ?? 10) * 15;
+        textoBase = mascara ?? 'W' * 10;
+        break;
 
       case TipoCampo.data:
-        return 10 * 15; // 99/99/9999
+        textoBase = '99/99/9999';
+        break;
     }
+
+    final textPainter = TextPainter(
+      text: TextSpan(text: textoBase, style: estilo),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    return textPainter.width + 24; // margem interna
   }
 
   // ==========================
@@ -153,18 +167,13 @@ class Campo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: _largura(),
-      height: 46,
+      width: _largura(context),
       child: TextField(
         focusNode: focusNode,
         autofocus: autofocus,
         controller: controller,
         enabled: enabled,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'CourierNew', // exemplo: monospaced
-        ),
+        style: _estilo(context),
         maxLength: _maxLength(),
         keyboardType: _keyboard(),
         textAlign: _align(),
@@ -172,6 +181,7 @@ class Campo extends StatelessWidget {
         inputFormatters: _formatters(),
         onSubmitted: (_) => _handleSubmit(context), // 👈 ENTER
         decoration: InputDecoration(
+          isDense: true, // altera o espaçamento para o minimo interna do label
           filled: true,
           fillColor: enabled ? Colors.grey.shade300 : Colors.grey.shade500,
           labelText: titulo,
@@ -179,8 +189,8 @@ class Campo extends StatelessWidget {
           border: const OutlineInputBorder(),
 
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 3,
-            vertical: 1,
+            horizontal: 5,
+            vertical: 11,
           ),
         ),
       ),
@@ -301,4 +311,19 @@ class UpperCaseTextFormatter extends TextInputFormatter {
       selection: newValue.selection,
     );
   }
+}
+
+// ==========================
+// Estilo de fonte
+// ==========================
+TextStyle _estilo(BuildContext context) {
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+        fontSize: 16,
+        //fontWeight: FontWeight.w400,
+        fontFamily: 'RobotoMono', // fonte equivalente a CourrierNew
+      ) ??
+      const TextStyle(
+        fontSize: 16,
+        //fontWeight: FontWeight.w400,
+      );
 }

@@ -243,7 +243,7 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
                 children: [
                   Campo(
                     tipo: TipoCampo.inteiro,
-                    titulo: 'Código',
+                    titulo: 'ID',
                     controller: _codigoController,
                     focusNode: _codigoFocus,
                     nextFocus: _nomeFocus,

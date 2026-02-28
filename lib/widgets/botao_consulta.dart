@@ -9,7 +9,7 @@ class BotaoConsulta extends StatelessWidget {
     super.key,
     required this.onPressed,
     this.tooltip = 'Consultar',
-    this.height = 50,
+    this.height = 35,
   });
 
   @override

@@ -150,9 +150,10 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
           minWidth: 900,
           showCheckboxColumn: false,
           columns: const [
-            DataColumn2(label: Text('Código'), fixedWidth: 70, numeric: true),
-            DataColumn2(label: Text('Nome'), size: ColumnSize.L),
-            DataColumn2(label: Text('UF'), size: ColumnSize.L),
+            DataColumn2(label: Text('ID'), fixedWidth: 70, numeric: true),
+            //DataColumn2(label: Text('Nome'), size: ColumnSize.L),
+            DataColumn2(label: Text('Nome'), fixedWidth: 450),
+            DataColumn2(label: Text('UF'), fixedWidth: 30),
           ],
           rows: List.generate(_filtrada.length, (index) {
             final p = _filtrada[index];

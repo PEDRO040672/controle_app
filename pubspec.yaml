@@ -30,6 +30,8 @@ flutter:
   uses-material-design: true
 
 fonts:
-  - family: CourierNew
+  - family: RobotoMono
     fonts:
-      - asset: assets/fonts/CourierNew.ttf
+      - asset: assets/fonts/RobotoMono-Regular.ttf
+      - asset: assets/fonts/RobotoMono-SemiBold.ttf
+        weight: 600

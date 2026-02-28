@@ -154,7 +154,7 @@ class _ConsultaPessoasState extends BaseConsState<ConsultaPessoas> {
           minWidth: 900,
           showCheckboxColumn: false,
           columns: const [
-            DataColumn2(label: Text('Código'), fixedWidth: 70, numeric: true),
+            DataColumn2(label: Text('ID'), fixedWidth: 70, numeric: true),
             DataColumn2(label: Text('Nome'), size: ColumnSize.L),
             DataColumn2(label: Text('Email'), size: ColumnSize.L),
             DataColumn2(label: Text('Telefone'), size: ColumnSize.M),
