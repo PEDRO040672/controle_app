@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/pessoa.dart';
-import '../services/api_service.dart';
+import '../services/pessoa_service.dart';
 import '../widgets/campo.dart';
 import '../widgets/msg.dart';
 import '../widgets/botoes_formulario.dart';
@@ -17,6 +17,8 @@ class CadastroClientePage extends BaseFormPage {
 }
 
 class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
+  final PessoaService _service = PessoaService();
+
   final _codigoController = TextEditingController();
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
@@ -122,8 +124,7 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
     _iniciarCarregamento();
 
     try {
-      final pessoa = await ApiService.getPessoaById(codigo);
-
+      final pessoa = await _service.getById(codigo);
       if (!mounted) return;
 
       if (pessoa != null) {
@@ -168,9 +169,9 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
 
     try {
       if (codigo == 0) {
-        await ApiService.addPessoa(pessoa);
+        await _service.add(pessoa);
       } else {
-        await ApiService.updatePessoa(pessoa);
+        await _service.update(pessoa);
       }
 
       if (!mounted) return;
@@ -196,8 +197,7 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
     _iniciarCarregamento();
 
     try {
-      await ApiService.deletePessoa(codigo);
-
+      await _service.delete(codigo);
       if (!mounted) return;
 
       await MSG(context, 'Aviso', 'Registro excluído com sucesso.', 1);

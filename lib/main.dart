@@ -27,16 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scrollBehavior: const MaterialScrollBehavior().copyWith(
-        scrollbars: true,
-      ), //scrollBehavior: const MaterialScrollBehavior().copyWith(
-
-      //  dragDevices: {
-      //    PointerDeviceKind.mouse,
-      //    PointerDeviceKind.touch,
-      //    PointerDeviceKind.trackpad,
-      //  },
-      //),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: true),
       debugShowCheckedModeBanner: false,
       title: 'Controle Administrativo',
       theme: ThemeData(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:data_table_2/data_table_2.dart';
 
 import '../models/pessoa.dart';
-import '../services/api_service.dart';
+import '../services/pessoa_service.dart';
 import 'base_cons.dart';
 
 class ConsultaPessoas extends BaseConsPage {
@@ -23,10 +23,9 @@ class ConsultaPessoas extends BaseConsPage {
 }
 
 class _ConsultaPessoasState extends BaseConsState<ConsultaPessoas> {
+  final PessoaService _service = PessoaService();
   final TextEditingController _filtroController = TextEditingController();
-
   final ScrollController _vertical = ScrollController();
-
   final ScrollController _horizontal = ScrollController();
 
   List<Pessoa> _lista = [];
@@ -51,7 +50,7 @@ class _ConsultaPessoasState extends BaseConsState<ConsultaPessoas> {
   Future<void> carregar() async {
     setState(() => _loading = true);
 
-    final dados = await ApiService.getPessoas();
+    final dados = await _service.getAll();
     if (!mounted) return;
 
     setState(() {
