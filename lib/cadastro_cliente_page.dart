@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/pessoa.dart';
-import '../services/pessoa_service.dart';
+import '../models/pessoa_models.dart';
+import 'services/pessoa_services.dart';
 import '../widgets/campo.dart';
 import '../widgets/msg.dart';
 import '../widgets/botoes_formulario.dart';

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/pessoa.dart';
+import '../models/pessoa_models.dart';
 import '../core/api_config.dart';
 
 class PessoaService {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:data_table_2/data_table_2.dart';
 
-import '../models/pessoa.dart';
-import '../services/pessoa_service.dart';
+import '../models/pessoa_models.dart';
+import 'services/pessoa_services.dart';
 import 'base_cons.dart';
 
 class ConsultaPessoas extends BaseConsPage {
