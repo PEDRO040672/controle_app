@@ -7,6 +7,7 @@ class Cadtit {
   final String tit_bai;
   final String tit_cep;
   final int tit_cid;
+  final String cid_nome;
   final String tit_obs;
 
   Cadtit({
@@ -18,6 +19,7 @@ class Cadtit {
     required this.tit_bai,
     required this.tit_cep,
     required this.tit_cid,
+    required this.cid_nome,
     required this.tit_obs,
   });
 
@@ -31,6 +33,7 @@ class Cadtit {
       tit_bai: json['tit_bai'],
       tit_cep: json['tit_cep'],
       tit_cid: json['tit_cid'],
+      cid_nome: json['cid_nome'],
       tit_obs: json['tit_obs'],
     );
   }
@@ -44,6 +47,7 @@ class Cadtit {
     'tit_bai': tit_bai,
     'tit_cep': tit_cep,
     'tit_cid': tit_cid,
+    'cid_nome': cid_nome,
     'tit_obs': tit_obs,
   };
 }

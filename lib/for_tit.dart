@@ -27,6 +27,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
   final _tit_baiController = TextEditingController();
   final _tit_cepController = TextEditingController();
   final _tit_cidController = TextEditingController();
+  final _cid_nomeController = TextEditingController();
   final _tit_obsController = TextEditingController();
 
   final _tit_idFocus = FocusNode();
@@ -82,6 +83,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     _tit_baiController.clear();
     _tit_cepController.clear();
     _tit_cidController.clear();
+    _cid_nomeController.clear();
     _tit_obsController.clear();
   }
 
@@ -144,6 +146,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
           _tit_baiController.text = cadtit.tit_bai;
           _tit_cepController.text = cadtit.tit_cep;
           _tit_cidController.text = cadtit.tit_cid.toString();
+          _cid_nomeController.text = cadtit.cid_nome;
           _tit_obsController.text = cadtit.tit_obs;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -179,6 +182,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
       tit_bai: _tit_baiController.text,
       tit_cep: _tit_cepController.text,
       tit_cid: int.parse(_tit_cidController.text),
+      cid_nome: _cid_nomeController.text,
       tit_obs: _tit_obsController.text,
     );
     _iniciarCarregamento();
@@ -379,23 +383,38 @@ class _ForTitState extends BaseFormState<ForTitPage> {
                   enabled: !_habilitado,
                 ),
                 const SizedBox(height: 10),
-                Campo(
-                  tipo: TipoCampo.inteiro,
-                  titulo: 'Cidade',
-                  controller: _tit_cidController,
-                  focusNode: _tit_cidFocus,
-                  nextFocus: _tit_obsFocus,
-                  tamanho: 5,
-                  zeroEsquerda: true,
-                  enabled: !_habilitado,
-                  //onDoubleTap: () {
-                  //  _abrirConsulta();
-                  //},
-                  //onSubmitted: () async {
-                  //  await _carregarCadtit();
-                  //  return true;
-                  //},
+
+                Row(
+                  children: [
+                    Campo(
+                      tipo: TipoCampo.inteiro,
+                      titulo: 'Cidade',
+                      controller: _tit_cidController,
+                      focusNode: _tit_cidFocus,
+                      nextFocus: _tit_obsFocus,
+                      tamanho: 5,
+                      zeroEsquerda: true,
+                      enabled: !_habilitado,
+                      //onDoubleTap: () {
+                      //  _abrirConsulta();
+                      //},
+                      //onSubmitted: () async {
+                      //  await _carregarCadtit();
+                      //  return true;
+                      //},
+                    ),
+                    SizedBox(width: 5),
+                    Campo(
+                      tipo: TipoCampo.texto,
+                      titulo: 'Nome da Cidade',
+                      controller: _cid_nomeController,
+                      focusNode: _tit_obsFocus,
+                      tamanho: 50,
+                      enabled: false,
+                    ),
+                  ],
                 ),
+
                 const SizedBox(height: 10),
                 Campo(
                   tipo: TipoCampo.texto,
@@ -450,6 +469,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     _tit_baiController.dispose();
     _tit_cepController.dispose();
     _tit_cidController.dispose();
+    _cid_nomeController.dispose();
     _tit_obsController.dispose();
     _tit_idFocus.dispose();
     _tit_nomeFocus.dispose();
