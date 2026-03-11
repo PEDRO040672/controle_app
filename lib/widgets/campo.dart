@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum TipoCampo { texto, inteiro, moeda, data, mascara }
+enum TipoCampo { texto, inteiro, moeda, data, mascara, uf }
 
 class Campo extends StatelessWidget {
   final TipoCampo tipo;
@@ -9,6 +9,7 @@ class Campo extends StatelessWidget {
   final String titulo;
   final TextEditingController controller;
   final FocusNode focusNode;
+  final VoidCallback? onDoubleTap;
   final FocusNode? nextFocus;
   final Future<bool> Function()? onSubmitted;
 
@@ -24,6 +25,7 @@ class Campo extends StatelessWidget {
     required this.titulo,
     required this.controller,
     required this.focusNode,
+    this.onDoubleTap,
     this.nextFocus,
     this.onSubmitted,
     this.tamanho = 50,
@@ -38,33 +40,34 @@ class Campo extends StatelessWidget {
   // ==========================
   double _largura(BuildContext context) {
     final estilo = _estilo(context);
-
     // Texto base para cálculo
     String textoBase;
-
     switch (tipo) {
       case TipoCampo.texto:
       case TipoCampo.inteiro:
-        textoBase = 'W' * tamanho;
+        textoBase = 'W' * (tamanho + 1);
         break;
-
       case TipoCampo.moeda:
       case TipoCampo.mascara:
-        textoBase = mascara ?? 'W' * 10;
+        if (mascara == null) {
+          textoBase = 'W' * 10;
+        } else {
+          textoBase = '${mascara}WWW';
+        }
         break;
-
       case TipoCampo.data:
-        textoBase = '99/99/9999';
+        textoBase = '99/99/9999WW';
+        break;
+      case TipoCampo.uf:
+        textoBase = 'WWW'; // largura para sigla
         break;
     }
-
     final textPainter = TextPainter(
       text: TextSpan(text: textoBase, style: estilo),
       maxLines: 1,
       textDirection: TextDirection.ltr,
     )..layout();
-
-    return textPainter.width + 24; // margem interna
+    return textPainter.width + 10; // margem interna
   }
 
   // ==========================
@@ -76,6 +79,8 @@ class Campo extends StatelessWidget {
       case TipoCampo.moeda:
       case TipoCampo.data:
         return TextInputType.number;
+      case TipoCampo.uf:
+        return TextInputType.none;
       default:
         return TextInputType.text;
     }
@@ -115,6 +120,9 @@ class Campo extends StatelessWidget {
 
       case TipoCampo.data:
         return [MaskTextInputFormatter('99/99/9999')];
+
+      case TipoCampo.uf:
+        return null;
     }
   }
 
@@ -126,13 +134,13 @@ class Campo extends StatelessWidget {
       case TipoCampo.texto:
       case TipoCampo.inteiro:
         return tamanho;
-
       case TipoCampo.moeda:
       case TipoCampo.mascara:
         return mascara?.length;
-
       case TipoCampo.data:
         return 10;
+      case TipoCampo.uf:
+        return 2;
     }
   }
 
@@ -166,31 +174,79 @@ class Campo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: _largura(context),
-      child: TextField(
-        focusNode: focusNode,
-        autofocus: autofocus,
-        controller: controller,
-        enabled: enabled,
-        style: _estilo(context),
-        maxLength: _maxLength(),
-        keyboardType: _keyboard(),
-        textAlign: _align(),
-        textInputAction: TextInputAction.next, // 👈 IMPORTANTE
-        inputFormatters: _formatters(),
-        onSubmitted: (_) => _handleSubmit(context), // 👈 ENTER
-        decoration: InputDecoration(
-          isDense: true, // altera o espaçamento para o minimo interna do label
-          filled: true,
-          fillColor: enabled ? Colors.grey.shade300 : Colors.grey.shade500,
-          labelText: titulo,
-          counterText: '',
-          border: const OutlineInputBorder(),
+    if (tipo == TipoCampo.uf) {
+      return SizedBox(
+        width: _largura(context) + 30, // espaço da seta
+        child: DropdownButtonFormField<String>(
+          value: controller.text.isEmpty ? null : controller.text,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          isDense: true,
+          style: _estilo(context),
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: enabled ? Colors.grey.shade300 : Colors.grey.shade500,
+            labelText: titulo,
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 5,
+              vertical: 10,
+            ),
+          ),
+          items: _ufs
+              .map((uf) => DropdownMenuItem<String>(value: uf, child: Text(uf)))
+              .toList(),
+          onChanged: enabled
+              ? (value) {
+                  controller.text = value ?? '';
+                  _handleSubmit(context);
+                }
+              : null,
+        ),
+      );
+    }
 
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 5,
-            vertical: 11,
+    // comportamento padrão (TextField)
+    return GestureDetector(
+      onDoubleTap: enabled ? onDoubleTap : null,
+      child: SizedBox(
+        width: _largura(context),
+        child: TextField(
+          focusNode: focusNode,
+          autofocus: autofocus,
+          controller: controller,
+          enabled: enabled,
+          style: _estilo(context),
+          maxLength: _maxLength(),
+          keyboardType: _keyboard(),
+          textAlign: _align(),
+          textInputAction: TextInputAction.next,
+          inputFormatters: _formatters(),
+          onSubmitted: (_) => _handleSubmit(context),
+          onTap: () {
+            focusNode.onKeyEvent = (node, event) {
+              if (event is KeyDownEvent &&
+                  event.logicalKey == LogicalKeyboardKey.f2 &&
+                  onDoubleTap != null &&
+                  enabled) {
+                onDoubleTap!();
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            };
+          },
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: enabled ? Colors.grey.shade300 : Colors.grey.shade500,
+            labelText: titulo,
+            counterText: '',
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 5,
+              vertical: 10,
+            ),
           ),
         ),
       ),
@@ -233,6 +289,39 @@ class Campo extends StatelessWidget {
 
     return formatado;
   }
+
+  // ==========================
+  // UTILITÁRIOS UF
+  // ==========================
+  static const List<String> _ufs = [
+    'AC',
+    'AL',
+    'AP',
+    'AM',
+    'BA',
+    'CE',
+    'DF',
+    'ES',
+    'GO',
+    'MA',
+    'MT',
+    'MS',
+    'MG',
+    'PA',
+    'PB',
+    'PR',
+    'PE',
+    'PI',
+    'RJ',
+    'RN',
+    'RS',
+    'RO',
+    'RR',
+    'SC',
+    'SP',
+    'SE',
+    'TO',
+  ];
 }
 
 // ==========================

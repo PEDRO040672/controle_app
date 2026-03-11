@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'cadastro_cliente_page.dart';
-import 'For_Cid.dart';
+import 'for_cid.dart';
+import 'for_tit.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -164,9 +164,9 @@ class _MenuPageState extends State<MenuPage> {
             onTap: () {
               _abrirModulo(
                 _Modulo(
-                  id: 'cidades',
+                  id: 'forcid',
                   titulo: 'Cidades',
-                  widget: ForCidPage(onClose: () => _fecharModulo('cidades')),
+                  widget: ForCidPage(onClose: () => _fecharModulo('forcid')),
                 ),
               );
             },
@@ -174,17 +174,15 @@ class _MenuPageState extends State<MenuPage> {
           ListTile(
             leading: const Icon(Icons.person, color: Colors.white),
             title: const Text(
-              'Clientes',
+              'Titulares',
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
               _abrirModulo(
                 _Modulo(
-                  id: 'clientes',
-                  titulo: 'Clientes',
-                  widget: CadastroClientePage(
-                    onClose: () => _fecharModulo('clientes'),
-                  ),
+                  id: 'fortit',
+                  titulo: 'Titulares',
+                  widget: ForTitPage(onClose: () => _fecharModulo('fortit')),
                 ),
               );
             },

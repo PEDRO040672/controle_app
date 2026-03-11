@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:data_table_2/data_table_2.dart';
 
-import '../models/cadcid_models.dart';
-import 'services/cadcid_services.dart';
+import '../models/cadtit_models.dart';
+import 'services/cadtit_services.dart';
 import 'base_cons.dart';
 
-class ConsultaCadcid extends BaseConsPage {
-  const ConsultaCadcid({super.key}) : super(titulo: 'Consulta de Cidades');
+class ConsultaCadtit extends BaseConsPage {
+  const ConsultaCadtit({super.key}) : super(titulo: 'Consulta de Titulares');
 
   static Future<int?> abrir(BuildContext context) {
     return Navigator.of(context, rootNavigator: true).push<int>(
       PageRouteBuilder(
         opaque: false,
         barrierDismissible: false,
-        pageBuilder: (_, __, ___) => const ConsultaCadcid(),
+        pageBuilder: (_, __, ___) => const ConsultaCadtit(),
       ),
     );
   }
 
   @override
-  State<ConsultaCadcid> createState() => _ConsultaCadcidState();
+  State<ConsultaCadtit> createState() => _ConsultaCadtitState();
 }
 
-class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
-  final CadcidServices _services = CadcidServices();
+class _ConsultaCadtitState extends BaseConsState<ConsultaCadtit> {
+  final CadtitServices _services = CadtitServices();
   final TextEditingController _filtroController = TextEditingController();
   final ScrollController _vertical = ScrollController();
   final ScrollController _horizontal = ScrollController();
 
-  List<Cadcid> _lista = [];
-  List<Cadcid> _filtrada = [];
+  List<Cadtit> _lista = [];
+  List<Cadtit> _filtrada = [];
 
   bool _loading = true;
   int _selectedIndex = -1;
@@ -63,7 +63,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
 
   void _selecionar(int index) {
     if (index >= 0 && index < _filtrada.length) {
-      Navigator.of(context).pop(_filtrada[index].cid_id);
+      Navigator.of(context).pop(_filtrada[index].tit_id);
     }
   }
 
@@ -76,8 +76,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
 
     setState(() {
       _filtrada = _lista.where((p) {
-        return p.cid_nome.toLowerCase().contains(t) ||
-            p.cid_uf.toLowerCase().contains(t);
+        return p.tit_nome.toLowerCase().contains(t);
       }).toList();
       _selectedIndex = _filtrada.isNotEmpty ? 0 : -1;
     });
@@ -103,7 +102,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
   @override
   void selecionarAtual() {
     if (_selectedIndex >= 0 && _selectedIndex < _filtrada.length) {
-      Navigator.of(context).pop(_filtrada[_selectedIndex].cid_id);
+      Navigator.of(context).pop(_filtrada[_selectedIndex].tit_id);
     }
   }
 
@@ -154,7 +153,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
             //DataColumn2(label: Text('Nome'), size: ColumnSize.L),
             //DataColumn2(label: Text('Nome'), fixedWidth: 450),
             DataColumn2(label: Text('Nome')),
-            DataColumn2(label: Text('UF'), fixedWidth: 30),
+            DataColumn2(label: Text('Fone')),
           ],
           rows: List.generate(_filtrada.length, (index) {
             final p = _filtrada[index];
@@ -181,7 +180,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
               cells: [
                 DataCell(
                   Text(
-                    p.cid_id.toString(),
+                    p.tit_id.toString(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     softWrap: false,
@@ -189,7 +188,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
                 ),
                 DataCell(
                   Text(
-                    p.cid_nome,
+                    p.tit_nome,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     softWrap: false,
@@ -197,7 +196,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
                 ),
                 DataCell(
                   Text(
-                    p.cid_uf,
+                    p.tit_fone,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     softWrap: false,

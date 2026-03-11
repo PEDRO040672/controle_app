@@ -1,10 +1,10 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../models/cadcid_models.dart';
 import 'services/cadcid_services.dart';
 import '../widgets/campo.dart';
 import '../widgets/msg.dart';
-import '../widgets/botoes_formulario.dart';
-import '../widgets/botao_consulta.dart';
+import 'widgets/botoes.dart';
 import 'base_form.dart';
 import 'con_cid.dart';
 
@@ -35,7 +35,6 @@ class _ForCidState extends BaseFormState<ForCidPage> {
   // ============================================================
   // LOADING
   // ============================================================
-
   void _iniciarCarregamento() {
     setState(() => _carregando = true);
   }
@@ -49,11 +48,9 @@ class _ForCidState extends BaseFormState<ForCidPage> {
   // ============================================================
   // INIT
   // ============================================================
-
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _cid_idFocus.requestFocus();
@@ -62,15 +59,17 @@ class _ForCidState extends BaseFormState<ForCidPage> {
   }
 
   // ============================================================
-  // LIMPAR / CANCELAR
+  // LIMPAR
   // ============================================================
-
   void _limparCampos() {
     _cid_idController.clear();
     _cid_nomeController.clear();
     _cid_ufController.clear();
   }
 
+  // ============================================================
+  // CANCELAR
+  // ============================================================
   void _cancelar() {
     FocusScope.of(context).unfocus();
     setState(() {
@@ -87,7 +86,6 @@ class _ForCidState extends BaseFormState<ForCidPage> {
   // ============================================================
   // ESC INTELIGENTE
   // ============================================================
-
   @override
   void onEscapePressed() {
     if (_habilitado) {
@@ -100,29 +98,23 @@ class _ForCidState extends BaseFormState<ForCidPage> {
   // ============================================================
   // CARREGAR
   // ============================================================
-
   Future<void> _carregarCadcid() async {
     final codigo = int.tryParse(_cid_idController.text) ?? 0;
-
     if (codigo <= 0) {
       setState(() {
         _inclusao = true;
         _habilitado = false;
         _limparCampos();
       });
-
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _cid_nomeFocus.requestFocus();
       });
       return;
     }
-
     _iniciarCarregamento();
-
     try {
       final cadcid = await _services.getById(codigo);
       if (!mounted) return;
-
       if (cadcid != null) {
         setState(() {
           _inclusao = false;
@@ -130,7 +122,6 @@ class _ForCidState extends BaseFormState<ForCidPage> {
           _cid_nomeController.text = cadcid.cid_nome;
           _cid_ufController.text = cadcid.cid_uf;
         });
-
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _cid_nomeFocus.requestFocus();
         });
@@ -149,27 +140,25 @@ class _ForCidState extends BaseFormState<ForCidPage> {
   // ============================================================
   // GRAVAR
   // ============================================================
-
   Future<void> _gravar() async {
-    final codigo = int.tryParse(_cid_idController.text) ?? 0;
+    if (!await _valid_cid_nome()) return;
+    if (!await _valid_cid_uf()) return;
 
+    //--------[ Se PASSOU nas Validações, CONTINUA ]------------
+    final codigo = int.tryParse(_cid_idController.text) ?? 0;
     final cadcid = Cadcid(
       cid_id: codigo,
       cid_nome: _cid_nomeController.text,
       cid_uf: _cid_ufController.text,
     );
-
     _iniciarCarregamento();
-
     try {
       if (codigo == 0) {
         await _services.add(cadcid);
       } else {
         await _services.update(cadcid);
       }
-
       if (!mounted) return;
-
       await MSG(context, 'Aviso', 'Registro gravado com sucesso.', 1);
       _cancelar();
     } catch (e) {
@@ -204,7 +193,6 @@ class _ForCidState extends BaseFormState<ForCidPage> {
   // ============================================================
   // CONSULTA
   // ============================================================
-
   Future<void> _abrirConsulta() async {
     FocusScope.of(context).unfocus();
 
@@ -216,89 +204,139 @@ class _ForCidState extends BaseFormState<ForCidPage> {
     }
   }
 
+  //========================[ _valid_cid_nome ]===========
+  Future<bool> _valid_cid_nome() async {
+    _cid_nomeController.text = _cid_nomeController.text.trim();
+    if (_cid_nomeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('O campo NOME está vazio.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _cid_nomeFocus.requestFocus(); // volta foco no campo
+      return false;
+    }
+    return true;
+  }
+
+  //========================[ _valid_cid_uf ]===========
+  Future<bool> _valid_cid_uf() async {
+    _cid_ufController.text = _cid_ufController.text.trim();
+    if (_cid_ufController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('O campo UF está vazio.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _cid_ufFocus.requestFocus(); // volta foco no campo
+      return false;
+    }
+    return true;
+  }
+
   // ============================================================
   // UI
   // ============================================================
 
   @override
   Widget buildBody(BuildContext context) {
-    return Stack(
-      children: [
-        FocusTraversalGroup(
-          policy: OrderedTraversalPolicy(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Campo(
-                    tipo: TipoCampo.inteiro,
-                    titulo: 'ID',
-                    controller: _cid_idController,
-                    focusNode: _cid_idFocus,
-                    nextFocus: _cid_nomeFocus,
-                    tamanho: 5,
-                    zeroEsquerda: true,
-                    enabled: _habilitado,
-                    onSubmitted: () async {
-                      await _carregarCadcid();
-                      return true;
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  BotaoConsulta(onPressed: _habilitado ? _abrirConsulta : null),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Campo(
-                tipo: TipoCampo.texto,
-                titulo: 'Nome',
-                controller: _cid_nomeController,
-                focusNode: _cid_nomeFocus,
-                nextFocus: _cid_ufFocus,
-                tamanho: 50,
-                enabled: !_habilitado,
-              ),
-              const SizedBox(height: 8),
-              Campo(
-                tipo: TipoCampo.texto,
-                titulo: 'UF',
-                controller: _cid_ufController,
-                focusNode: _cid_ufFocus,
-                nextFocus: _gravarFocus,
-                tamanho: 2,
-                enabled: !_habilitado,
-              ),
-              const SizedBox(height: 10),
-              BotoesFormulario(
-                habilitado: _habilitado,
-                inclusao: _inclusao,
-                onGravar: _gravar,
-                onExcluir: _excluir,
-                onCancelar: _cancelar,
-                onFechar: widget.onClose,
-                focusGravar: _gravarFocus,
-              ),
-            ],
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent) {
+          // F2
+          if (event.logicalKey == LogicalKeyboardKey.f2) {
+            if (_habilitado && _cid_idFocus.hasFocus) {
+              _abrirConsulta();
+              return KeyEventResult.handled;
+            }
+          }
+          // ESC (mantém comportamento original)
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            onEscapePressed();
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Stack(
+        //---------------------------------------
+        children: [
+          FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Campo(
+                  tipo: TipoCampo.inteiro,
+                  titulo: 'ID [2c/F2]',
+                  controller: _cid_idController,
+                  focusNode: _cid_idFocus,
+                  nextFocus: _cid_nomeFocus,
+                  tamanho: 5,
+                  zeroEsquerda: true,
+                  enabled: _habilitado,
+                  onDoubleTap: () {
+                    _abrirConsulta();
+                  },
+                  onSubmitted: () async {
+                    await _carregarCadcid();
+                    return true;
+                  },
+                ),
+                const SizedBox(height: 10),
+                Campo(
+                  tipo: TipoCampo.texto,
+                  titulo: 'Nome',
+                  controller: _cid_nomeController,
+                  focusNode: _cid_nomeFocus,
+                  onSubmitted: _valid_cid_nome,
+                  nextFocus: _cid_ufFocus,
+                  tamanho: 50,
+                  enabled: !_habilitado,
+                ),
+                const SizedBox(height: 10),
+                Campo(
+                  tipo: TipoCampo.uf,
+                  titulo: 'UF',
+                  controller: _cid_ufController,
+                  focusNode: _cid_ufFocus,
+                  onSubmitted: _valid_cid_uf,
+                  nextFocus: _gravarFocus,
+                  enabled: !_habilitado,
+                ),
+                const SizedBox(height: 10),
+                BotoesFormulario(
+                  habilitado: _habilitado,
+                  inclusao: _inclusao,
+                  onGravar: _gravar,
+                  onExcluir: _excluir,
+                  onCancelar: _cancelar,
+                  onFechar: widget.onClose,
+                  focusGravar: _gravarFocus,
+                ),
+              ],
+            ),
           ),
-        ),
 
-        // OVERLAY DE LOADING
-        if (_carregando)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.2),
-              child: const Center(
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(strokeWidth: 3),
+          // OVERLAY DE LOADING
+          if (_carregando)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+                child: const Center(
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

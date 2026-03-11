@@ -1,10 +1,10 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import '../models/pessoa_models.dart';
 import 'services/pessoa_services.dart';
 import '../widgets/campo.dart';
 import '../widgets/msg.dart';
-import '../widgets/botoes_formulario.dart';
-import '../widgets/botao_consulta.dart';
+import 'widgets/botoes.dart';
 import 'base_form.dart';
 import 'consulta_pessoas.dart';
 
@@ -228,96 +228,112 @@ class _CadastroClientePageState extends BaseFormState<CadastroClientePage> {
   // ============================================================
   // UI
   // ============================================================
-
   @override
   Widget buildBody(BuildContext context) {
-    return Stack(
-      children: [
-        FocusTraversalGroup(
-          policy: OrderedTraversalPolicy(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Campo(
-                    tipo: TipoCampo.inteiro,
-                    titulo: 'ID',
-                    controller: _codigoController,
-                    focusNode: _codigoFocus,
-                    nextFocus: _nomeFocus,
-                    tamanho: 5,
-                    zeroEsquerda: true,
-                    enabled: _habilitado,
-                    onSubmitted: () async {
-                      await _carregarPessoa();
-                      return true;
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  BotaoConsulta(onPressed: _habilitado ? _abrirConsulta : null),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Campo(
-                tipo: TipoCampo.texto,
-                titulo: 'Nome',
-                controller: _nomeController,
-                focusNode: _nomeFocus,
-                nextFocus: _emailFocus,
-                tamanho: 50,
-                enabled: !_habilitado,
-              ),
-              const SizedBox(height: 8),
-              Campo(
-                tipo: TipoCampo.texto,
-                titulo: 'Email',
-                controller: _emailController,
-                focusNode: _emailFocus,
-                nextFocus: _telefoneFocus,
-                tamanho: 80,
-                enabled: !_habilitado,
-              ),
-              const SizedBox(height: 8),
-              Campo(
-                tipo: TipoCampo.mascara,
-                titulo: 'Telefone',
-                controller: _telefoneController,
-                focusNode: _telefoneFocus,
-                nextFocus: _gravarFocus,
-                mascara: '(99) ?9999-9999',
-                enabled: !_habilitado,
-              ),
-              const SizedBox(height: 10),
-              BotoesFormulario(
-                habilitado: _habilitado,
-                inclusao: _inclusao,
-                onGravar: _gravar,
-                onExcluir: _excluir,
-                onCancelar: _cancelar,
-                onFechar: widget.onClose,
-                focusGravar: _gravarFocus,
-              ),
-            ],
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent) {
+          // F2
+          if (event.logicalKey == LogicalKeyboardKey.f2) {
+            if (_habilitado && _codigoFocus.hasFocus) {
+              _abrirConsulta();
+              return KeyEventResult.handled;
+            }
+          }
+          // ESC (mantém comportamento original)
+          if (event.logicalKey == LogicalKeyboardKey.escape) {
+            onEscapePressed();
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Stack(
+        //-----------------------------------------------------
+        children: [
+          FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Campo(
+                  tipo: TipoCampo.inteiro,
+                  titulo: 'ID [2c/F2]',
+                  controller: _codigoController,
+                  focusNode: _codigoFocus,
+                  nextFocus: _nomeFocus,
+                  tamanho: 5,
+                  zeroEsquerda: true,
+                  enabled: _habilitado,
+                  onDoubleTap: () {
+                    _abrirConsulta();
+                  },
+                  onSubmitted: () async {
+                    await _carregarPessoa();
+                    return true;
+                  },
+                ),
+                const SizedBox(height: 10),
+                Campo(
+                  tipo: TipoCampo.texto,
+                  titulo: 'Nome',
+                  controller: _nomeController,
+                  focusNode: _nomeFocus,
+                  nextFocus: _emailFocus,
+                  tamanho: 50,
+                  enabled: !_habilitado,
+                ),
+                const SizedBox(height: 10),
+                Campo(
+                  tipo: TipoCampo.texto,
+                  titulo: 'Email',
+                  controller: _emailController,
+                  focusNode: _emailFocus,
+                  nextFocus: _telefoneFocus,
+                  tamanho: 80,
+                  enabled: !_habilitado,
+                ),
+                const SizedBox(height: 10),
+                Campo(
+                  tipo: TipoCampo.mascara,
+                  titulo: 'Telefone',
+                  controller: _telefoneController,
+                  focusNode: _telefoneFocus,
+                  nextFocus: _gravarFocus,
+                  mascara: '(99) ?9999-9999',
+                  enabled: !_habilitado,
+                ),
+                const SizedBox(height: 10),
+                BotoesFormulario(
+                  habilitado: _habilitado,
+                  inclusao: _inclusao,
+                  onGravar: _gravar,
+                  onExcluir: _excluir,
+                  onCancelar: _cancelar,
+                  onFechar: widget.onClose,
+                  focusGravar: _gravarFocus,
+                ),
+              ],
+            ),
           ),
-        ),
 
-        // OVERLAY DE LOADING
-        if (_carregando)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.2),
-              child: const Center(
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(strokeWidth: 3),
+          // OVERLAY DE LOADING
+          if (_carregando)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+                child: const Center(
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
