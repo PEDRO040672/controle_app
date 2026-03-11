@@ -9,12 +9,12 @@ class ConsultaCadtit extends BaseConsPage {
   const ConsultaCadtit({super.key}) : super(titulo: 'Consulta de Titulares');
 
   static Future<int?> abrir(BuildContext context) {
-    return Navigator.of(context, rootNavigator: true).push<int>(
-      PageRouteBuilder(
-        opaque: false,
-        barrierDismissible: false,
-        pageBuilder: (_, __, ___) => const ConsultaCadtit(),
-      ),
+    return showDialog<int>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const ConsultaCadtit();
+      },
     );
   }
 
@@ -23,7 +23,7 @@ class ConsultaCadtit extends BaseConsPage {
 }
 
 class _ConsultaCadtitState extends BaseConsState<ConsultaCadtit> {
-  final CadtitServices _services = CadtitServices();
+  final CadtitServices _titServices = CadtitServices();
   final TextEditingController _filtroController = TextEditingController();
   final ScrollController _vertical = ScrollController();
   final ScrollController _horizontal = ScrollController();
@@ -50,7 +50,7 @@ class _ConsultaCadtitState extends BaseConsState<ConsultaCadtit> {
   Future<void> carregar() async {
     setState(() => _loading = true);
 
-    final dados = await _services.getAll();
+    final dados = await _titServices.getAll();
     if (!mounted) return;
 
     setState(() {

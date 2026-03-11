@@ -1,10 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import '../models/cadcid_models.dart';
-import 'services/cadcid_services.dart';
+import 'widgets/botoes.dart';
 import '../widgets/campo.dart';
 import '../widgets/msg.dart';
-import 'widgets/botoes.dart';
+import '../models/cadcid_models.dart';
+import 'services/cadcid_services.dart';
 import 'base_form.dart';
 import 'con_cid.dart';
 
@@ -17,7 +17,7 @@ class ForCidPage extends BaseFormPage {
 }
 
 class _ForCidState extends BaseFormState<ForCidPage> {
-  final CadcidServices _services = CadcidServices();
+  final CadcidServices _cidServices = CadcidServices();
 
   final _cid_idController = TextEditingController();
   final _cid_nomeController = TextEditingController();
@@ -113,7 +113,7 @@ class _ForCidState extends BaseFormState<ForCidPage> {
     }
     _iniciarCarregamento();
     try {
-      final cadcid = await _services.getById(codigo);
+      final cadcid = await _cidServices.getById(codigo);
       if (!mounted) return;
       if (cadcid != null) {
         setState(() {
@@ -154,9 +154,9 @@ class _ForCidState extends BaseFormState<ForCidPage> {
     _iniciarCarregamento();
     try {
       if (codigo == 0) {
-        await _services.add(cadcid);
+        await _cidServices.add(cadcid);
       } else {
-        await _services.update(cadcid);
+        await _cidServices.update(cadcid);
       }
       if (!mounted) return;
       await MSG(context, 'Aviso', 'Registro gravado com sucesso.', 1);
@@ -178,7 +178,7 @@ class _ForCidState extends BaseFormState<ForCidPage> {
     if (codigo <= 0) return;
     _iniciarCarregamento();
     try {
-      await _services.delete(codigo);
+      await _cidServices.delete(codigo);
       if (!mounted) return;
       await MSG(context, 'Aviso', 'Registro excluído com sucesso.', 1);
       _cancelar();
@@ -276,7 +276,7 @@ class _ForCidState extends BaseFormState<ForCidPage> {
                   focusNode: _cid_idFocus,
                   nextFocus: _cid_nomeFocus,
                   tamanho: 5,
-                  zeroEsquerda: true,
+                  //zeroEsquerda: true,
                   enabled: _habilitado,
                   onDoubleTap: () {
                     _abrirConsulta();

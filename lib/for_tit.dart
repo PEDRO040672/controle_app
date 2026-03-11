@@ -1,12 +1,14 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import '../models/cadtit_models.dart';
-import 'services/cadtit_services.dart';
+import 'widgets/botoes.dart';
 import '../widgets/campo.dart';
 import '../widgets/msg.dart';
-import 'widgets/botoes.dart';
+import '../models/cadtit_models.dart';
+import 'services/cadtit_services.dart';
+import 'services/cadcid_services.dart';
 import 'base_form.dart';
 import 'con_tit.dart';
+import 'con_cid.dart';
 
 class ForTitPage extends BaseFormPage {
   const ForTitPage({super.key, required super.onClose})
@@ -17,7 +19,8 @@ class ForTitPage extends BaseFormPage {
 }
 
 class _ForTitState extends BaseFormState<ForTitPage> {
-  final CadtitServices _services = CadtitServices();
+  final CadtitServices _titServices = CadtitServices();
+  final CadcidServices _cidServices = CadcidServices();
 
   final _tit_idController = TextEditingController();
   final _tit_nomeController = TextEditingController();
@@ -38,6 +41,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
   final _tit_baiFocus = FocusNode();
   final _tit_cepFocus = FocusNode();
   final _tit_cidFocus = FocusNode();
+  final _cid_nomeFocus = FocusNode();
   final _tit_obsFocus = FocusNode();
   final _gravarFocus = FocusNode();
 
@@ -97,7 +101,6 @@ class _ForTitState extends BaseFormState<ForTitPage> {
       _habilitado = true;
       _limparCampos();
     });
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _tit_idFocus.requestFocus();
     });
@@ -113,6 +116,53 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     } else {
       _cancelar();
     }
+  }
+
+  // ============================================================
+  // CARREGAR CADCID
+  // ============================================================
+  Future<bool> _carregarCadcid() async {
+    final codigo = int.tryParse(_tit_cidController.text) ?? 0;
+    if (codigo <= 0) {
+      setState(() {
+        _tit_cidController.clear();
+        _cid_nomeController.clear();
+        _tit_cidFocus.requestFocus();
+      });
+      return false;
+    }
+    _iniciarCarregamento();
+    try {
+      final cadcid = await _cidServices.getById(codigo);
+      if (!mounted) {
+        setState(() {
+          _tit_cidController.clear();
+          _cid_nomeController.clear();
+          _tit_cidFocus.requestFocus();
+        });
+        return false;
+      }
+      if (cadcid != null) {
+        _cid_nomeController.text = cadcid.cid_nome;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _tit_obsFocus.requestFocus();
+        });
+      } else {
+        await MSG(context, 'Aviso', 'Cidade não encontrado.', 1);
+        setState(() {
+          _tit_cidController.clear();
+          _cid_nomeController.clear();
+          _tit_cidFocus.requestFocus();
+        });
+        return false;
+      }
+    } catch (e) {
+      if (!mounted) return false;
+      await MSG(context, 'Erro', '$e', 1);
+    } finally {
+      _finalizarCarregamento();
+    }
+    return true;
   }
 
   // ============================================================
@@ -133,7 +183,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     }
     _iniciarCarregamento();
     try {
-      final cadtit = await _services.getById(codigo);
+      final cadtit = await _titServices.getById(codigo);
       if (!mounted) return;
       if (cadtit != null) {
         setState(() {
@@ -170,6 +220,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
   Future<void> _gravar() async {
     if (!await _valid_tit_nome()) return;
     if (!await _valid_tit_fone()) return;
+    if (!await _carregarCadcid()) return;
 
     //--------[ Se PASSOU nas Validações, CONTINUA ]------------
     final codigo = int.tryParse(_tit_idController.text) ?? 0;
@@ -188,9 +239,9 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     _iniciarCarregamento();
     try {
       if (codigo == 0) {
-        await _services.add(cadtit);
+        await _titServices.add(cadtit);
       } else {
-        await _services.update(cadtit);
+        await _titServices.update(cadtit);
       }
       if (!mounted) return;
       await MSG(context, 'Aviso', 'Registro gravado com sucesso.', 1);
@@ -212,7 +263,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     if (codigo <= 0) return;
     _iniciarCarregamento();
     try {
-      await _services.delete(codigo);
+      await _titServices.delete(codigo);
       if (!mounted) return;
       await MSG(context, 'Aviso', 'Registro excluído com sucesso.', 1);
       _cancelar();
@@ -221,6 +272,20 @@ class _ForTitState extends BaseFormState<ForTitPage> {
       await MSG(context, 'Erro', 'Erro ao excluir: $e', 1);
     } finally {
       _finalizarCarregamento();
+    }
+  }
+
+  // ============================================================
+  // CONSULTA  CADCID
+  // ============================================================
+  Future<void> _abrirConsultaCadcid() async {
+    FocusScope.of(context).unfocus();
+
+    final int? idSelecionado = await ConsultaCadcid.abrir(context);
+
+    if (idSelecionado != null) {
+      _tit_cidController.text = idSelecionado.toString();
+      await _carregarCadcid();
     }
   }
 
@@ -286,6 +351,10 @@ class _ForTitState extends BaseFormState<ForTitPage> {
               _abrirConsulta();
               return KeyEventResult.handled;
             }
+            if (_habilitado && _tit_cidFocus.hasFocus) {
+              _abrirConsultaCadcid();
+              return KeyEventResult.handled;
+            }
           }
           // ESC (mantém comportamento original)
           if (event.logicalKey == LogicalKeyboardKey.escape) {
@@ -310,7 +379,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
                   focusNode: _tit_idFocus,
                   nextFocus: _tit_nomeFocus,
                   tamanho: 5,
-                  zeroEsquerda: true,
+                  //zeroEsquerda: true,
                   enabled: _habilitado,
                   onDoubleTap: () {
                     _abrirConsulta();
@@ -393,24 +462,23 @@ class _ForTitState extends BaseFormState<ForTitPage> {
                       focusNode: _tit_cidFocus,
                       nextFocus: _tit_obsFocus,
                       tamanho: 5,
-                      zeroEsquerda: true,
+                      //zeroEsquerda: true,
                       enabled: !_habilitado,
-                      //onDoubleTap: () {
-                      //  _abrirConsulta();
-                      //},
-                      //onSubmitted: () async {
-                      //  await _carregarCadtit();
-                      //  return true;
-                      //},
+                      onDoubleTap: () {
+                        _abrirConsultaCadcid();
+                      },
+                      onSubmitted: _carregarCadcid,
                     ),
                     SizedBox(width: 5),
-                    Campo(
-                      tipo: TipoCampo.texto,
-                      titulo: 'Nome da Cidade',
-                      controller: _cid_nomeController,
-                      focusNode: _tit_obsFocus,
-                      tamanho: 50,
-                      enabled: false,
+                    Expanded(
+                      child: Campo(
+                        tipo: TipoCampo.texto,
+                        titulo: '',
+                        controller: _cid_nomeController,
+                        focusNode: _cid_nomeFocus,
+                        tamanho: 50,
+                        enabled: false,
+                      ),
                     ),
                   ],
                 ),
@@ -479,6 +547,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     _tit_baiFocus.dispose();
     _tit_cepFocus.dispose();
     _tit_cidFocus.dispose();
+    _cid_nomeFocus.dispose();
     _tit_obsFocus.dispose();
     _gravarFocus.dispose();
     super.dispose();

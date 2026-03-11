@@ -66,6 +66,12 @@ abstract class BaseConsState<T extends BaseConsPage> extends State<T> {
   void initState() {
     super.initState();
     carregar();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        gridFocus.requestFocus();
+      }
+    });
   }
 
   @override
@@ -83,7 +89,7 @@ abstract class BaseConsState<T extends BaseConsPage> extends State<T> {
         child: Center(
           child: BaseFormContainer(
             child: KeyboardListener(
-              autofocus: true,
+              //autofocus: true,
               focusNode: gridFocus,
               onKeyEvent: handleKey,
               child: Column(

@@ -9,12 +9,12 @@ class ConsultaCadcid extends BaseConsPage {
   const ConsultaCadcid({super.key}) : super(titulo: 'Consulta de Cidades');
 
   static Future<int?> abrir(BuildContext context) {
-    return Navigator.of(context, rootNavigator: true).push<int>(
-      PageRouteBuilder(
-        opaque: false,
-        barrierDismissible: false,
-        pageBuilder: (_, __, ___) => const ConsultaCadcid(),
-      ),
+    return showDialog<int>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const ConsultaCadcid();
+      },
     );
   }
 
@@ -23,7 +23,7 @@ class ConsultaCadcid extends BaseConsPage {
 }
 
 class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
-  final CadcidServices _services = CadcidServices();
+  final CadcidServices _cidServices = CadcidServices();
   final TextEditingController _filtroController = TextEditingController();
   final ScrollController _vertical = ScrollController();
   final ScrollController _horizontal = ScrollController();
@@ -50,7 +50,7 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
   Future<void> carregar() async {
     setState(() => _loading = true);
 
-    final dados = await _services.getAll();
+    final dados = await _cidServices.getAll();
     if (!mounted) return;
 
     setState(() {

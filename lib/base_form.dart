@@ -14,7 +14,7 @@ class BaseFormContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 900;
+        final isDesktop = constraints.maxWidth > 700;
 
         if (isDesktop) {
           return Align(
@@ -30,14 +30,11 @@ class BaseFormContainer extends StatelessWidget {
 
         return Align(
           alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
+          child: Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(12),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: _decoration(context),
-              child: child,
-            ),
+            decoration: _decoration(context),
+            child: child,
           ),
         );
       },
