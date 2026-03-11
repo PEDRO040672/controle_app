@@ -28,54 +28,23 @@ class CadtitServices {
     }
   }
 
-  //Future<void> add(Cadtit cadtit) async {
-  //  final response = await http.post(
-  //    Uri.parse('${ApiConfig.baseUrl}/cadtit'),
-  //    headers: {'Content-Type': 'application/json'},
-  //    body: json.encode({
-  //      'tit_nome': cadtit.tit_nome,
-  //      'tit_doc': cadtit.tit_doc,
-  //      'tit_fone': cadtit.tit_fone,
-  //      'tit_end': cadtit.tit_end,
-  //      'tit_bai': cadtit.tit_bai,
-  //      'tit_cep': cadtit.tit_cep,
-  //      'tit_cid': cadtit.tit_cid,
-  //      'tit_obs': cadtit.tit_obs,
-  //    }),
-  //  );
-  //  if (response.statusCode != 200 && response.statusCode != 201) {
-  //    //throw Exception('Erro ao adicionar Titular.');
-  //    final erro = json.decode(response.body);
-  //    throw Exception(erro['erro'] ?? 'Erro ao adicionar Titular.');
-  //  }
-  //}
   Future<void> add(Cadtit cadtit) async {
-    final body = json.encode({
-      'tit_nome': cadtit.tit_nome,
-      'tit_doc': cadtit.tit_doc,
-      'tit_fone': cadtit.tit_fone,
-      'tit_end': cadtit.tit_end,
-      'tit_bai': cadtit.tit_bai,
-      'tit_cep': cadtit.tit_cep,
-      'tit_cid': cadtit.tit_cid,
-      'tit_obs': cadtit.tit_obs,
-    });
-
-    //print('JSON ENVIADO PARA API:');
-    //print(body);
-
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cadtit'),
       headers: {'Content-Type': 'application/json'},
-      body: body,
+      body: json.encode({
+        'tit_nome': cadtit.tit_nome,
+        'tit_doc': cadtit.tit_doc,
+        'tit_fone': cadtit.tit_fone,
+        'tit_end': cadtit.tit_end,
+        'tit_bai': cadtit.tit_bai,
+        'tit_cep': cadtit.tit_cep,
+        'tit_cid': cadtit.tit_cid,
+        'tit_obs': cadtit.tit_obs,
+      }),
     );
-
     if (response.statusCode != 200 && response.statusCode != 201) {
-      //final erro = json.decode(response.body);
-      //throw Exception(erro['erro'] ?? 'Erro ao adicionar Titular.');
-      throw Exception(
-        'Status: ${response.statusCode}\nResposta: ${response.body}',
-      );
+      throw Exception('Erro ao adicionar Titular.');
     }
   }
 
