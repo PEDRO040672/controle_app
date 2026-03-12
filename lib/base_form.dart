@@ -28,13 +28,26 @@ class BaseFormContainer extends StatelessWidget {
           );
         }
 
+        //return Align(
+        //  alignment: Alignment.topCenter,
+        //  child: Container(
+        //    width: double.infinity,
+        //    padding: const EdgeInsets.all(12),
+        //   decoration: _decoration(context),
+        //    child: child,
+        //  ),
+        //);
+        final altura = MediaQuery.of(context).size.height;
         return Align(
           alignment: Alignment.topCenter,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: _decoration(context),
-            child: child,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 700, maxHeight: altura - 40),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: _decoration(context),
+              child: child,
+            ),
           ),
         );
       },
@@ -93,7 +106,6 @@ abstract class BaseFormState<T extends BaseFormPage> extends State<T> {
     return FocusScope(
       node: _formFocusScope,
       autofocus: true,
-      //autofocus: false,
       child: Shortcuts(
         shortcuts: {
           LogicalKeySet(LogicalKeyboardKey.escape): const ActivateIntent(),
@@ -108,14 +120,18 @@ abstract class BaseFormState<T extends BaseFormPage> extends State<T> {
             ),
           },
           child: BaseFormContainer(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BaseFormHeader(titulo: widget.titulo, onClose: widget.onClose),
-                const SizedBox(height: 24),
-                buildBody(context), // ← ISSO É OBRIGATÓRIO
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BaseFormHeader(
+                    titulo: widget.titulo,
+                    onClose: widget.onClose,
+                  ),
+                  const SizedBox(height: 24),
+                  buildBody(context),
+                ],
+              ),
             ),
           ),
         ),

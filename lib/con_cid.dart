@@ -140,72 +140,89 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
         trackVisibility: true,
         notificationPredicate: (notification) =>
             notification.metrics.axis == Axis.horizontal,
-        child: DataTable2(
-          scrollController: _vertical,
-          horizontalScrollController: _horizontal,
-          columnSpacing: 24,
-          horizontalMargin: 12,
-          dataRowHeight: 42,
-          headingRowHeight: 46,
-          minWidth: 600,
-          showCheckboxColumn: false,
-          columns: const [
-            DataColumn2(label: Text('ID'), fixedWidth: 70, numeric: true),
-            //DataColumn2(label: Text('Nome'), size: ColumnSize.L),
-            //DataColumn2(label: Text('Nome'), fixedWidth: 450),
-            DataColumn2(label: Text('Nome')),
-            DataColumn2(label: Text('UF'), fixedWidth: 30),
-          ],
-          rows: List.generate(_filtrada.length, (index) {
-            final p = _filtrada[index];
-            final isSelected = index == _selectedIndex;
 
-            return DataRow2(
-              selected: isSelected,
-              onTap: () => setState(() => _selectedIndex = index),
-              onDoubleTap: () {
-                setState(() => _selectedIndex = index);
-                _selecionar(index);
-              },
-              color: WidgetStateProperty.resolveWith<Color?>((states) {
-                if (isSelected) {
-                  return Theme.of(
-                    context,
-                  ).colorScheme.primary.withOpacity(0.18);
-                }
-                if (isDesktop && states.contains(WidgetState.hovered)) {
-                  return Colors.grey.withOpacity(0.08);
-                }
-                return null;
-              }),
-              cells: [
-                DataCell(
-                  Text(
-                    p.cid_id.toString(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            dataTableTheme: DataTableThemeData(
+              dataTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontFamily: 'RobotoMono',
+                fontSize: 15,
+              ),
+              headingTextStyle: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(
+                    fontFamily: 'RobotoMono',
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                DataCell(
-                  Text(
-                    p.cid_nome,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
+            ),
+          ),
+          child: DataTable2(
+            scrollController: _vertical,
+            horizontalScrollController: _horizontal,
+            columnSpacing: 24,
+            horizontalMargin: 12,
+            dataRowHeight: 42,
+            headingRowHeight: 46,
+            minWidth: 600,
+            showCheckboxColumn: false,
+            columns: const [
+              DataColumn2(label: Text('ID'), fixedWidth: 70, numeric: true),
+              //DataColumn2(label: Text('Nome'), size: ColumnSize.L),
+              //DataColumn2(label: Text('Nome'), fixedWidth: 450),
+              DataColumn2(label: Text('Nome')),
+              DataColumn2(label: Text('UF'), fixedWidth: 30),
+            ],
+            rows: List.generate(_filtrada.length, (index) {
+              final p = _filtrada[index];
+              final isSelected = index == _selectedIndex;
+
+              return DataRow2(
+                selected: isSelected,
+                onTap: () => setState(() => _selectedIndex = index),
+                onDoubleTap: () {
+                  setState(() => _selectedIndex = index);
+                  _selecionar(index);
+                },
+                color: WidgetStateProperty.resolveWith<Color?>((states) {
+                  if (isSelected) {
+                    return Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.18);
+                  }
+                  if (isDesktop && states.contains(WidgetState.hovered)) {
+                    return Colors.grey.withOpacity(0.08);
+                  }
+                  return null;
+                }),
+                cells: [
+                  DataCell(
+                    Text(
+                      p.cid_id.toString(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                    ),
                   ),
-                ),
-                DataCell(
-                  Text(
-                    p.cid_uf,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
+                  DataCell(
+                    Text(
+                      p.cid_nome,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
+                  DataCell(
+                    Text(
+                      p.cid_uf,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
         ),
       ),
     );

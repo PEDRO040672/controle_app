@@ -44,22 +44,24 @@ class Campo extends StatelessWidget {
     String textoBase;
     switch (tipo) {
       case TipoCampo.texto:
+        textoBase = 'W' * (tamanho + 7);
+        break;
       case TipoCampo.inteiro:
-        textoBase = 'W' * (tamanho + 1);
+        textoBase = 'W' * (tamanho + 3);
         break;
       case TipoCampo.moeda:
       case TipoCampo.mascara:
         if (mascara == null) {
-          textoBase = 'W' * 10;
+          textoBase = 'W' * 12;
         } else {
-          textoBase = '${mascara}WWW';
+          textoBase = '${mascara}WWWWW';
         }
         break;
       case TipoCampo.data:
-        textoBase = '99/99/9999WW';
+        textoBase = '99/99/9999WWWWW';
         break;
       case TipoCampo.uf:
-        textoBase = 'WWW'; // largura para sigla
+        textoBase = 'WWWW'; // largura para sigla
         break;
     }
     final textPainter = TextPainter(
@@ -191,7 +193,7 @@ class Campo extends StatelessWidget {
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 5,
-              vertical: 10,
+              vertical: 7,
             ),
           ),
           items: _ufs
@@ -245,7 +247,7 @@ class Campo extends StatelessWidget {
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 5,
-              vertical: 10,
+              vertical: 7,
             ),
           ),
         ),
@@ -407,12 +409,8 @@ class UpperCaseTextFormatter extends TextInputFormatter {
 // ==========================
 TextStyle _estilo(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
-        fontSize: 16,
-        //fontWeight: FontWeight.w400,
-        fontFamily: 'RobotoMono', // fonte equivalente a CourrierNew
+        fontSize: 15,
+        fontFamily: 'RobotoMono',
       ) ??
-      const TextStyle(
-        fontSize: 16,
-        //fontWeight: FontWeight.w400,
-      );
+      const TextStyle(fontSize: 15);
 }

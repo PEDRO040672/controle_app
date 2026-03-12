@@ -129,6 +129,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
         _cid_nomeController.clear();
         _tit_cidFocus.requestFocus();
       });
+      _abrirConsultaCadcid();
       return false;
     }
     _iniciarCarregamento();
