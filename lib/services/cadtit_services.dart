@@ -44,7 +44,8 @@ class CadtitServices {
       }),
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Erro ao adicionar Titular.');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao adicionar Titular.');
     }
   }
 
@@ -65,7 +66,8 @@ class CadtitServices {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Erro ao atualizar Titular.');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao atualizar Titular.');
     }
   }
 

@@ -221,7 +221,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
   Future<void> _gravar() async {
     if (!await _valid_tit_nome()) return;
     if (!await _valid_tit_fone()) return;
-    if (!await _carregarCadcid()) return;
+    //if (!await _carregarCadcid()) return;
 
     //--------[ Se PASSOU nas Validações, CONTINUA ]------------
     final codigo = int.tryParse(_tit_idController.text) ?? 0;

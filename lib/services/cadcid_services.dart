@@ -37,7 +37,8 @@ class CadcidServices {
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Erro ao adicionar Cidade');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao adicionar Cidade.');
     }
   }
 
@@ -49,7 +50,8 @@ class CadcidServices {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Erro ao atualizar Cidade');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao atualizar Cidade.');
     }
   }
 
