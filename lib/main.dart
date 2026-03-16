@@ -89,7 +89,6 @@ class _MenuPageState extends State<MenuPage> {
   /// ============================
   /// CONTROLE DE MÓDULOS (MDI)
   /// ============================
-
   void _abrirModulo(_Modulo modulo) {
     final existenteIndex = _modulosAbertos.indexWhere((m) => m.id == modulo.id);
 
@@ -138,7 +137,6 @@ class _MenuPageState extends State<MenuPage> {
   /// ============================
   /// DRAWER (ÚNICO MENU DO APP)
   /// ============================
-
   Widget _buildDrawer() {
     return Drawer(
       width: 200,

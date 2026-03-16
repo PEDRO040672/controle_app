@@ -314,7 +314,6 @@ class _ForCidState extends BaseFormState<ForCidPage> {
                   onGravar: _gravar,
                   onExcluir: _excluir,
                   onCancelar: _cancelar,
-                  onFechar: widget.onClose,
                   focusGravar: _gravarFocus,
                 ),
               ],

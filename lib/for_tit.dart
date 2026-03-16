@@ -502,7 +502,6 @@ class _ForTitState extends BaseFormState<ForTitPage> {
                   onGravar: _gravar,
                   onExcluir: _excluir,
                   onCancelar: _cancelar,
-                  onFechar: widget.onClose,
                   focusGravar: _gravarFocus,
                 ),
               ],
