@@ -197,7 +197,7 @@ class _MenuPageState extends State<MenuPage> {
                 _Modulo(
                   id: 'foreqp',
                   titulo: 'Equipamentos',
-                  widget: ForTitPage(onClose: () => _fecharModulo('foreqp')),
+                  widget: ForEqpPage(onClose: () => _fecharModulo('foreqp')),
                 ),
               );
             },
