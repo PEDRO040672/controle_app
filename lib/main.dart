@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'for_cid.dart';
 import 'for_tit.dart';
+import 'for_eqp.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -181,6 +182,22 @@ class _MenuPageState extends State<MenuPage> {
                   id: 'fortit',
                   titulo: 'Titulares',
                   widget: ForTitPage(onClose: () => _fecharModulo('fortit')),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.white),
+            title: const Text(
+              'Equipamentos',
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () {
+              _abrirModulo(
+                _Modulo(
+                  id: 'foreqp',
+                  titulo: 'Equipamentos',
+                  widget: ForTitPage(onClose: () => _fecharModulo('foreqp')),
                 ),
               );
             },

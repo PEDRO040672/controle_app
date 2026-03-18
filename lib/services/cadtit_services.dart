@@ -11,7 +11,8 @@ class CadtitServices {
       final List jsonList = json.decode(response.body);
       return jsonList.map((e) => Cadtit.fromJson(e)).toList();
     } else {
-      throw Exception('Erro ao buscar Titular.');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao buscar Titular.');
     }
   }
 
@@ -24,7 +25,8 @@ class CadtitServices {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception('Erro ao buscar Titular.');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao buscar Titular.');
     }
   }
 
@@ -76,7 +78,8 @@ class CadtitServices {
       Uri.parse('${ApiConfig.baseUrl}/cadtit/$tit_id'),
     );
     if (response.statusCode != 200) {
-      throw Exception('Erro ao excluir Titular.');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao excluir Titular.');
     }
   }
 }

@@ -11,7 +11,8 @@ class CadcidServices {
       final List jsonList = json.decode(response.body);
       return jsonList.map((e) => Cadcid.fromJson(e)).toList();
     } else {
-      throw Exception('Erro ao buscar Cidade');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao buscar Cidade.');
     }
   }
 
@@ -25,7 +26,8 @@ class CadcidServices {
     } else if (response.statusCode == 404) {
       return null;
     } else {
-      throw Exception('Erro ao buscar Cidade');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao buscar Cidade.');
     }
   }
 
@@ -61,7 +63,8 @@ class CadcidServices {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Erro ao excluir Cidade');
+      final body = json.decode(response.body);
+      throw Exception(body['erro'] ?? 'Erro ao excluir Cidade.');
     }
   }
 }

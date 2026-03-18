@@ -19,6 +19,8 @@ dependencies:
 
   data_table_2: ^2.5.15
 
+  intl: ^0.19.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

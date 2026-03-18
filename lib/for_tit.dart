@@ -352,7 +352,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
               _abrirConsulta();
               return KeyEventResult.handled;
             }
-            if (_habilitado && _tit_cidFocus.hasFocus) {
+            if (!_habilitado && _tit_cidFocus.hasFocus) {
               _abrirConsultaCadcid();
               return KeyEventResult.handled;
             }

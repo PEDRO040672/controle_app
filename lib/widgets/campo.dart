@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum TipoCampo { texto, inteiro, moeda, data, mascara, uf }
+enum TipoCampo { texto, inteiro, double, data, mascara, uf }
 
 class Campo extends StatelessWidget {
   final TipoCampo tipo;
@@ -15,7 +15,7 @@ class Campo extends StatelessWidget {
 
   final int tamanho; // texto / inteiro
   final bool zeroEsquerda; // inteiro
-  final String? mascara; // moeda / mascara
+  final String? mascara; // double / mascara
   final bool enabled;
   final bool autofocus;
 
@@ -49,7 +49,7 @@ class Campo extends StatelessWidget {
       case TipoCampo.inteiro:
         textoBase = 'W' * (tamanho + 3);
         break;
-      case TipoCampo.moeda:
+      case TipoCampo.double:
       case TipoCampo.mascara:
         if (mascara == null) {
           textoBase = 'W' * 12;
@@ -78,7 +78,7 @@ class Campo extends StatelessWidget {
   TextInputType _keyboard() {
     switch (tipo) {
       case TipoCampo.inteiro:
-      case TipoCampo.moeda:
+      case TipoCampo.double:
       case TipoCampo.data:
         return TextInputType.number;
       case TipoCampo.uf:
@@ -94,7 +94,7 @@ class Campo extends StatelessWidget {
   TextAlign _align() {
     switch (tipo) {
       case TipoCampo.inteiro:
-      case TipoCampo.moeda:
+      case TipoCampo.double:
         return TextAlign.right;
       default:
         return TextAlign.left;
@@ -112,7 +112,7 @@ class Campo extends StatelessWidget {
       case TipoCampo.inteiro:
         return [FilteringTextInputFormatter.digitsOnly];
 
-      case TipoCampo.moeda:
+      case TipoCampo.double:
         if (mascara == null) return null;
         return [MaskTextInputFormatter(mascara!)];
 
@@ -136,7 +136,7 @@ class Campo extends StatelessWidget {
       case TipoCampo.texto:
       case TipoCampo.inteiro:
         return tamanho;
-      case TipoCampo.moeda:
+      case TipoCampo.double:
       case TipoCampo.mascara:
         return mascara?.length;
       case TipoCampo.data:
