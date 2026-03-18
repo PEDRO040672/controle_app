@@ -13,9 +13,9 @@ class Campo extends StatelessWidget {
   final FocusNode? nextFocus;
   final Future<bool> Function()? onSubmitted;
 
-  final int tamanho; // texto / inteiro
-  final bool zeroEsquerda; // inteiro
-  final String? mascara; // double / mascara
+  final int tamanho;
+  final bool zeroEsquerda;
+  final String? mascara;
   final bool enabled;
   final bool autofocus;
 
@@ -36,40 +36,38 @@ class Campo extends StatelessWidget {
   });
 
   // ==========================
-  // LARGURA DINÂMICA
+  // LARGURA
   // ==========================
   double _largura(BuildContext context) {
     final estilo = _estilo(context);
-    // Texto base para cálculo
-    String textoBase;
+
+    String base;
     switch (tipo) {
       case TipoCampo.texto:
-        textoBase = 'W' * (tamanho + 7);
+        base = 'W' * (tamanho + 7);
         break;
       case TipoCampo.inteiro:
-        textoBase = 'W' * (tamanho + 3);
+        base = 'W' * (tamanho + 3);
         break;
       case TipoCampo.double:
       case TipoCampo.mascara:
-        if (mascara == null) {
-          textoBase = 'W' * 12;
-        } else {
-          textoBase = '${mascara}WWWWW';
-        }
+        base = mascara != null ? '$mascara     ' : 'W' * 12;
         break;
       case TipoCampo.data:
-        textoBase = '99/99/9999WWWWW';
+        base = '99/99/9999     ';
         break;
       case TipoCampo.uf:
-        textoBase = 'WWWW'; // largura para sigla
+        base = 'WWWW';
         break;
     }
-    final textPainter = TextPainter(
-      text: TextSpan(text: textoBase, style: estilo),
+
+    final tp = TextPainter(
+      text: TextSpan(text: base, style: estilo),
       maxLines: 1,
       textDirection: TextDirection.ltr,
     )..layout();
-    return textPainter.width + 10; // margem interna
+
+    return tp.width + 10;
   }
 
   // ==========================
@@ -80,7 +78,7 @@ class Campo extends StatelessWidget {
       case TipoCampo.inteiro:
       case TipoCampo.double:
       case TipoCampo.data:
-        return TextInputType.number;
+        return const TextInputType.numberWithOptions(decimal: true);
       case TipoCampo.uf:
         return TextInputType.none;
       default:
@@ -89,7 +87,7 @@ class Campo extends StatelessWidget {
   }
 
   // ==========================
-  // ALINHAMENTO
+  // ALIGN
   // ==========================
   TextAlign _align() {
     switch (tipo) {
@@ -113,9 +111,26 @@ class Campo extends StatelessWidget {
         return [FilteringTextInputFormatter.digitsOnly];
 
       case TipoCampo.double:
-        if (mascara == null) return null;
-        return [MaskTextInputFormatter(mascara!)];
+        int casas = 0;
+        int inteiros = 0;
 
+        if (mascara != null) {
+          if (mascara!.contains(',')) {
+            final partes = mascara!.split(',');
+            casas = partes[1].length;
+            inteiros = partes[0].replaceAll('.', '').length;
+          } else {
+            inteiros = mascara!.replaceAll('.', '').length;
+          }
+        }
+
+        return [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9,\.]')),
+          DecimalTextInputFormatter(
+            decimalRange: casas,
+            integerRange: inteiros,
+          ),
+        ];
       case TipoCampo.mascara:
         if (mascara == null) return null;
         return [MaskTextInputFormatter(mascara!)];
@@ -136,18 +151,19 @@ class Campo extends StatelessWidget {
       case TipoCampo.texto:
       case TipoCampo.inteiro:
         return tamanho;
-      case TipoCampo.double:
       case TipoCampo.mascara:
         return mascara?.length;
       case TipoCampo.data:
         return 10;
       case TipoCampo.uf:
         return 2;
+      case TipoCampo.double:
+        return null; // 👈 importante
     }
   }
 
   // ==========================
-  // SUBMIT CENTRALIZADO
+  // SUBMIT
   // ==========================
   Future<void> _handleSubmit(BuildContext context) async {
     if (tipo == TipoCampo.inteiro && zeroEsquerda) {
@@ -170,7 +186,7 @@ class Campo extends StatelessWidget {
     if (nextFocus != null) {
       FocusScope.of(context).requestFocus(nextFocus);
     } else {
-      FocusScope.of(context).nextFocus(); // 👈 melhor que unfocus()
+      FocusScope.of(context).nextFocus();
     }
   }
 
@@ -178,26 +194,16 @@ class Campo extends StatelessWidget {
   Widget build(BuildContext context) {
     if (tipo == TipoCampo.uf) {
       return SizedBox(
-        width: _largura(context) + 30, // espaço da seta
+        width: _largura(context) + 30,
         child: DropdownButtonFormField<String>(
           value: controller.text.isEmpty ? null : controller.text,
           focusNode: focusNode,
           autofocus: autofocus,
           isDense: true,
           style: _estilo(context),
-          decoration: InputDecoration(
-            isDense: true,
-            filled: true,
-            fillColor: enabled ? Colors.grey.shade300 : Colors.grey.shade500,
-            labelText: titulo,
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 5,
-              vertical: 7,
-            ),
-          ),
+          decoration: _decoracao(),
           items: _ufs
-              .map((uf) => DropdownMenuItem<String>(value: uf, child: Text(uf)))
+              .map((uf) => DropdownMenuItem(value: uf, child: Text(uf)))
               .toList(),
           onChanged: enabled
               ? (value) {
@@ -209,7 +215,6 @@ class Campo extends StatelessWidget {
       );
     }
 
-    // comportamento padrão (TextField)
     return GestureDetector(
       onDoubleTap: enabled ? onDoubleTap : null,
       child: SizedBox(
@@ -226,75 +231,52 @@ class Campo extends StatelessWidget {
           textInputAction: TextInputAction.next,
           inputFormatters: _formatters(),
           onSubmitted: (_) => _handleSubmit(context),
-          onTap: () {
-            focusNode.onKeyEvent = (node, event) {
-              if (event is KeyDownEvent &&
-                  event.logicalKey == LogicalKeyboardKey.f2 &&
-                  onDoubleTap != null &&
-                  enabled) {
-                onDoubleTap!();
-                return KeyEventResult.handled;
-              }
-              return KeyEventResult.ignored;
-            };
-          },
-          decoration: InputDecoration(
-            isDense: true,
-            filled: true,
-            fillColor: enabled ? Colors.grey.shade300 : Colors.grey.shade500,
-            labelText: titulo,
-            counterText: '',
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 5,
-              vertical: 7,
-            ),
-          ),
+          decoration: _decoracao(),
         ),
       ),
     );
   }
 
+  InputDecoration _decoracao() {
+    return InputDecoration(
+      isDense: true,
+      filled: true,
+      fillColor: enabled ? Colors.grey.shade300 : Colors.grey.shade500,
+      labelText: titulo,
+      counterText: '',
+      border: const OutlineInputBorder(),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
+    );
+  }
+
   // ==========================
-  // UTILITÁRIOS MOEDA
+  // UTIL
   // ==========================
   static double textDouble(String text) {
-    final clean = text.replaceAll(RegExp(r'[^\d,]'), '');
-    if (clean.isEmpty) return 0.0;
+    if (text.trim().isEmpty) return 0.0;
 
-    return double.parse(clean.replaceAll('.', '').replaceAll(',', '.'));
+    final normalized = text.replaceAll('.', '').replaceAll(',', '.');
+
+    return double.tryParse(normalized) ?? 0.0;
   }
 
   static String doubleText(double value, String mascara) {
-    final casasDecimais = mascara.contains(',')
-        ? mascara.split(',').last.length
-        : 0;
+    final casas = mascara.contains(',') ? mascara.split(',').last.length : 0;
 
-    final texto = value.toStringAsFixed(casasDecimais);
-
+    final texto = value.toStringAsFixed(casas);
     final partes = texto.split('.');
-    final inteiro = partes[0];
-    final decimal = partes.length > 1 ? partes[1] : '';
 
-    String formatado = inteiro.replaceAllMapped(
+    String inteiro = partes[0];
+    String decimal = partes.length > 1 ? partes[1] : '';
+
+    inteiro = inteiro.replaceAllMapped(
       RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
       (m) => '${m[1]}.',
     );
 
-    if (casasDecimais > 0) {
-      formatado = '$formatado,$decimal';
-    }
-
-    if (mascara.contains('R\$')) {
-      formatado = 'R\$ $formatado';
-    }
-
-    return formatado;
+    return casas > 0 ? '$inteiro,$decimal' : inteiro;
   }
 
-  // ==========================
-  // UTILITÁRIOS UF
-  // ==========================
   static const List<String> _ufs = [
     'AC',
     'AL',
@@ -327,7 +309,59 @@ class Campo extends StatelessWidget {
 }
 
 // ==========================
-// FORMATTER MÁSCARA
+// DECIMAL FORMATTER
+// ==========================
+class DecimalTextInputFormatter extends TextInputFormatter {
+  final int decimalRange;
+  final int integerRange;
+
+  DecimalTextInputFormatter({
+    required this.decimalRange,
+    required this.integerRange,
+  });
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String text = newValue.text;
+
+    // só uma vírgula
+    if (','.allMatches(text).length > 1) return oldValue;
+
+    // evita só vírgula
+    if (text == ',') return oldValue;
+
+    // corrige ",5" → "0,5"
+    if (text.startsWith(',')) {
+      text = '0$text';
+    }
+
+    final partes = text.split(',');
+
+    String inteiro = partes[0];
+    String decimal = partes.length > 1 ? partes[1] : '';
+
+    // 🔥 LIMITA INTEIRO
+    if (integerRange > 0 && inteiro.length > integerRange) {
+      return oldValue;
+    }
+
+    // 🔥 LIMITA DECIMAL
+    if (decimalRange > 0 && decimal.length > decimalRange) {
+      return oldValue;
+    }
+
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+}
+
+// ==========================
+// MASK FORMATTER
 // ==========================
 class MaskTextInputFormatter extends TextInputFormatter {
   final String mask;
@@ -345,7 +379,6 @@ class MaskTextInputFormatter extends TextInputFormatter {
     final buffer = StringBuffer();
     int maskIndex = 0;
     int valueIndex = 0;
-
     final value = newValue.text;
 
     while (maskIndex < mask.length && valueIndex < value.length) {
@@ -353,34 +386,20 @@ class MaskTextInputFormatter extends TextInputFormatter {
       final v = value[valueIndex];
 
       if (m == '9' && _isDigit(v)) {
-        // dígito obrigatório
         buffer.write(v);
         maskIndex++;
         valueIndex++;
       } else if (m == 'A' && _isLetter(v)) {
-        // letra obrigatória
         buffer.write(v.toUpperCase());
         maskIndex++;
         valueIndex++;
-      } else if (m == '?') {
-        // aceita dígito ou espaço
-        if (valueIndex < value.length) {
-          final char = value[valueIndex];
-          if (_isDigit(char) || char == ' ') {
-            buffer.write(char);
-            valueIndex++;
-          }
-        }
-        // sempre avançamos na máscara, mesmo que o usuário não digite nada
-        maskIndex++;
       } else {
-        // caracteres fixos da máscara (como (, ), -, /, espaço)
         buffer.write(m);
-        // só avançamos no valor se o caractere do usuário coincidir com o literal
         if (v == m) valueIndex++;
         maskIndex++;
       }
     }
+
     return TextEditingValue(
       text: buffer.toString(),
       selection: TextSelection.collapsed(offset: buffer.length),
@@ -389,7 +408,7 @@ class MaskTextInputFormatter extends TextInputFormatter {
 }
 
 // ==========================
-// FORMATTER UPPERCASE
+// UPPERCASE
 // ==========================
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
@@ -405,7 +424,7 @@ class UpperCaseTextFormatter extends TextInputFormatter {
 }
 
 // ==========================
-// Estilo de fonte
+// ESTILO
 // ==========================
 TextStyle _estilo(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(

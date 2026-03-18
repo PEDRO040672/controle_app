@@ -13,7 +13,7 @@ class Cadeqp {
     return Cadeqp(
       eqp_id: json['eqp_id'],
       eqp_desc: json['eqp_desc'],
-      eqp_htkm: json['eqp_htkm'],
+      eqp_htkm: double.tryParse(json['eqp_htkm'].toString()) ?? 0.0,
     );
   }
 

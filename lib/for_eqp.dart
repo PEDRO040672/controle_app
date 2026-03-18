@@ -120,9 +120,10 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
           _inclusao = false;
           _habilitado = false;
           _eqp_descController.text = cadeqp.eqp_desc;
+          //_eqp_htkmController.text = cadeqp.eqp_htkm;
           _eqp_htkmController.text = Campo.doubleText(
             cadeqp.eqp_htkm,
-            '99999,9',
+            '999.999,9',
           );
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -290,7 +291,7 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
                   titulo: 'HT/KM',
                   controller: _eqp_htkmController,
                   focusNode: _eqp_htkmFocus,
-                  mascara: '999.999,99',
+                  mascara: '999.999,9',
                   nextFocus: _gravarFocus,
                   enabled: !_habilitado,
                 ),

@@ -29,6 +29,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
   final ScrollController _vertical = ScrollController();
   final ScrollController _horizontal = ScrollController();
   final formato = NumberFormat('#,##0.0', 'pt_BR');
+  //final formato = NumberFormat('###.##0,0', 'pt_BR');
 
   List<Cadeqp> _lista = [];
   List<Cadeqp> _filtrada = [];
@@ -170,7 +171,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
               //DataColumn2(label: Text('Nome'), size: ColumnSize.L),
               //DataColumn2(label: Text('Nome'), fixedWidth: 450),
               DataColumn2(label: Text('Descrição')),
-              DataColumn2(label: Text('HT/KM'), fixedWidth: 80, numeric: true),
+              DataColumn2(label: Text('HT/KM'), fixedWidth: 110, numeric: true),
             ],
             rows: List.generate(_filtrada.length, (index) {
               final p = _filtrada[index];
@@ -213,6 +214,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
                   ),
                   DataCell(
                     Text(
+                      //p.eqp_htkm,
                       formato.format(p.eqp_htkm),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
