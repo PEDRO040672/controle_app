@@ -3,29 +3,31 @@ import 'package:flutter/material.dart';
 import 'widgets/botoes.dart';
 import '../widgets/campo.dart';
 import '../widgets/msg.dart';
-import '../models/cadeqp_models.dart';
-import 'services/cadeqp_services.dart';
+import '../models/cadope_models.dart';
+import 'services/cadope_services.dart';
 import 'base_form.dart';
-import 'con_eqp.dart';
+import 'con_ope.dart';
 
-class ForEqpPage extends BaseFormPage {
-  const ForEqpPage({super.key, required super.onClose})
-    : super(titulo: 'Equipamentos');
+class ForOpePage extends BaseFormPage {
+  const ForOpePage({super.key, required super.onClose})
+    : super(titulo: 'Operadores');
 
   @override
-  State<ForEqpPage> createState() => _ForEqpState();
+  State<ForOpePage> createState() => _ForOpeState();
 }
 
-class _ForEqpState extends BaseFormState<ForEqpPage> {
-  final CadeqpServices _eqpServices = CadeqpServices();
+class _ForOpeState extends BaseFormState<ForOpePage> {
+  final CadopeServices _opeServices = CadopeServices();
 
-  final _eqp_idController = TextEditingController();
-  final _eqp_descController = TextEditingController();
-  final _eqp_htkmController = TextEditingController();
+  final _ope_idController = TextEditingController();
+  final _ope_nomeController = TextEditingController();
+  final _ope_fixoController = TextEditingController();
+  final _ope_percController = TextEditingController();
 
-  final _eqp_idFocus = FocusNode();
-  final _eqp_descFocus = FocusNode();
-  final _eqp_htkmFocus = FocusNode();
+  final _ope_idFocus = FocusNode();
+  final _ope_nomeFocus = FocusNode();
+  final _ope_fixoFocus = FocusNode();
+  final _ope_percFocus = FocusNode();
   final _gravarFocus = FocusNode();
 
   bool _inclusao = true;
@@ -53,7 +55,7 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _eqp_idFocus.requestFocus();
+        _ope_idFocus.requestFocus();
       }
     });
   }
@@ -62,9 +64,10 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
   // LIMPAR
   // ============================================================
   void _limparCampos() {
-    _eqp_idController.clear();
-    _eqp_descController.clear();
-    _eqp_htkmController.clear();
+    _ope_idController.clear();
+    _ope_nomeController.clear();
+    _ope_fixoController.clear();
+    _ope_percController.clear();
   }
 
   // ============================================================
@@ -79,7 +82,7 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _eqp_idFocus.requestFocus();
+      if (mounted) _ope_idFocus.requestFocus();
     });
   }
 
@@ -98,8 +101,8 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
   // ============================================================
   // CARREGAR
   // ============================================================
-  Future<void> _carregarCadeqp() async {
-    final codigo = int.tryParse(_eqp_idController.text) ?? 0;
+  Future<void> _carregarCadope() async {
+    final codigo = int.tryParse(_ope_idController.text) ?? 0;
     if (codigo <= 0) {
       setState(() {
         _inclusao = true;
@@ -107,26 +110,30 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
         _limparCampos();
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _eqp_descFocus.requestFocus();
+        if (mounted) _ope_nomeFocus.requestFocus();
       });
       return;
     }
     _iniciarCarregamento();
     try {
-      final cadeqp = await _eqpServices.getById(codigo);
+      final cadope = await _opeServices.getById(codigo);
       if (!mounted) return;
-      if (cadeqp != null) {
+      if (cadope != null) {
         setState(() {
           _inclusao = false;
           _habilitado = false;
-          _eqp_descController.text = cadeqp.eqp_desc;
-          _eqp_htkmController.text = Campo.doubleText(
-            cadeqp.eqp_htkm,
-            '999.999,9',
+          _ope_nomeController.text = cadope.ope_nome;
+          _ope_fixoController.text = Campo.doubleText(
+            cadope.ope_fixo,
+            '99.999,99',
+          );
+          _ope_percController.text = Campo.doubleText(
+            cadope.ope_perc,
+            '999,99',
           );
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _eqp_descFocus.requestFocus();
+          if (mounted) _ope_nomeFocus.requestFocus();
         });
       } else {
         await MSG(context, 'Aviso', 'Registro não encontrado.', 1);
@@ -144,22 +151,24 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
   // GRAVAR
   // ============================================================
   Future<void> _gravar() async {
-    if (!await _valid_eqp_desc()) return;
-    if (!await _valid_eqp_htkm()) return;
+    if (!await _valid_ope_nome()) return;
+    if (!await _valid_ope_fixo()) return;
+    if (!await _valid_ope_perc()) return;
 
     //--------[ Se PASSOU nas Validações, CONTINUA ]------------
-    final codigo = int.tryParse(_eqp_idController.text) ?? 0;
-    final cadeqp = Cadeqp(
-      eqp_id: codigo,
-      eqp_desc: _eqp_descController.text,
-      eqp_htkm: Campo.textDouble(_eqp_htkmController.text),
+    final codigo = int.tryParse(_ope_idController.text) ?? 0;
+    final cadope = Cadope(
+      ope_id: codigo,
+      ope_nome: _ope_nomeController.text,
+      ope_fixo: Campo.textDouble(_ope_fixoController.text),
+      ope_perc: Campo.textDouble(_ope_percController.text),
     );
     _iniciarCarregamento();
     try {
       if (codigo == 0) {
-        await _eqpServices.add(cadeqp);
+        await _opeServices.add(cadope);
       } else {
-        await _eqpServices.update(cadeqp);
+        await _opeServices.update(cadope);
       }
       if (!mounted) return;
       await MSG(context, 'Aviso', 'Registro gravado com sucesso.', 1);
@@ -177,11 +186,11 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
   // ============================================================
 
   Future<void> _excluir() async {
-    final codigo = int.tryParse(_eqp_idController.text) ?? 0;
+    final codigo = int.tryParse(_ope_idController.text) ?? 0;
     if (codigo <= 0) return;
     _iniciarCarregamento();
     try {
-      await _eqpServices.delete(codigo);
+      await _opeServices.delete(codigo);
       if (!mounted) return;
       await MSG(context, 'Aviso', 'Registro excluído com sucesso.', 1);
       _cancelar();
@@ -199,41 +208,57 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
   Future<void> _abrirConsulta() async {
     FocusScope.of(context).unfocus();
 
-    final int? idSelecionado = await ConsultaCadeqp.abrir(context);
+    final int? idSelecionado = await ConsultaCadope.abrir(context);
 
     if (idSelecionado != null) {
-      _eqp_idController.text = idSelecionado.toString();
-      await _carregarCadeqp();
+      _ope_idController.text = idSelecionado.toString();
+      await _carregarCadope();
     }
   }
 
-  //========================[ _valid_eqp_desc ]===========
-  Future<bool> _valid_eqp_desc() async {
-    _eqp_descController.text = _eqp_descController.text.trim();
-    if (_eqp_descController.text.isEmpty) {
+  //========================[ _valid_ope_nome ]===========
+  Future<bool> _valid_ope_nome() async {
+    _ope_nomeController.text = _ope_nomeController.text.trim();
+    if (_ope_nomeController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('O campo DESCRIÇÃO está vazio.'),
+          content: Text('O campo NOME está vazio.'),
           duration: Duration(seconds: 2),
         ),
       );
-      _eqp_descFocus.requestFocus(); // volta foco no campo
+      _ope_nomeFocus.requestFocus(); // volta foco no campo
       return false;
     }
     return true;
   }
 
-  //========================[ _valid_eqp_htkm ]===========
-  Future<bool> _valid_eqp_htkm() async {
-    final valor = Campo.textDouble(_eqp_htkmController.text);
+  //========================[ _valid_ope_fixo ]===========
+  Future<bool> _valid_ope_fixo() async {
+    final valor = Campo.textDouble(_ope_fixoController.text);
     if (valor < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('O campo HT/KM não pode ser negativo.'),
+          content: Text('O campo FIXO não pode ser negativo.'),
           duration: Duration(seconds: 2),
         ),
       );
-      _eqp_htkmFocus.requestFocus(); // volta foco no campo
+      _ope_fixoFocus.requestFocus(); // volta foco no campo
+      return false;
+    }
+    return true;
+  }
+
+  //========================[ _valid_ope_fixo ]===========
+  Future<bool> _valid_ope_perc() async {
+    final valor = Campo.textDouble(_ope_percController.text);
+    if (valor < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('O campo PERC. não pode ser negativo.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _ope_percFocus.requestFocus(); // volta foco no campo
       return false;
     }
     return true;
@@ -251,7 +276,7 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
         if (event is KeyDownEvent) {
           // F2
           if (event.logicalKey == LogicalKeyboardKey.f2) {
-            if (_habilitado && _eqp_idFocus.hasFocus) {
+            if (_habilitado && _ope_idFocus.hasFocus) {
               _abrirConsulta();
               return KeyEventResult.handled;
             }
@@ -275,9 +300,9 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
                 Campo(
                   tipo: TipoCampo.inteiro,
                   titulo: 'ID [2c/F2]',
-                  controller: _eqp_idController,
-                  focusNode: _eqp_idFocus,
-                  nextFocus: _eqp_descFocus,
+                  controller: _ope_idController,
+                  focusNode: _ope_idFocus,
+                  nextFocus: _ope_nomeFocus,
                   tamanho: 5,
                   //zeroEsquerda: true,
                   enabled: _habilitado,
@@ -285,29 +310,40 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
                     _abrirConsulta();
                   },
                   onSubmitted: () async {
-                    await _carregarCadeqp();
+                    await _carregarCadope();
                     return true;
                   },
                 ),
                 const SizedBox(height: 10),
                 Campo(
                   tipo: TipoCampo.texto,
-                  titulo: 'Descrição',
-                  controller: _eqp_descController,
-                  focusNode: _eqp_descFocus,
-                  onSubmitted: _valid_eqp_desc,
-                  nextFocus: _eqp_htkmFocus,
+                  titulo: 'Nome',
+                  controller: _ope_nomeController,
+                  focusNode: _ope_nomeFocus,
+                  onSubmitted: _valid_ope_nome,
+                  nextFocus: _ope_fixoFocus,
                   tamanho: 50,
                   enabled: !_habilitado,
                 ),
                 const SizedBox(height: 10),
                 Campo(
                   tipo: TipoCampo.double,
-                  titulo: 'HT/KM',
-                  controller: _eqp_htkmController,
-                  focusNode: _eqp_htkmFocus,
-                  mascara: '999.999,9',
-                  onSubmitted: _valid_eqp_htkm,
+                  titulo: 'Vl.Fixo',
+                  controller: _ope_fixoController,
+                  focusNode: _ope_fixoFocus,
+                  mascara: '99.999,99',
+                  onSubmitted: _valid_ope_fixo,
+                  nextFocus: _ope_percFocus,
+                  enabled: !_habilitado,
+                ),
+                const SizedBox(height: 10),
+                Campo(
+                  tipo: TipoCampo.double,
+                  titulo: 'Perc.%',
+                  controller: _ope_percController,
+                  focusNode: _ope_percFocus,
+                  mascara: '999,99',
+                  onSubmitted: _valid_ope_perc,
                   nextFocus: _gravarFocus,
                   enabled: !_habilitado,
                 ),
@@ -345,12 +381,14 @@ class _ForEqpState extends BaseFormState<ForEqpPage> {
 
   @override
   void dispose() {
-    _eqp_idController.dispose();
-    _eqp_descController.dispose();
-    _eqp_htkmController.dispose();
-    _eqp_idFocus.dispose();
-    _eqp_descFocus.dispose();
-    _eqp_htkmFocus.dispose();
+    _ope_idController.dispose();
+    _ope_nomeController.dispose();
+    _ope_fixoController.dispose();
+    _ope_percController.dispose();
+    _ope_idFocus.dispose();
+    _ope_nomeFocus.dispose();
+    _ope_fixoFocus.dispose();
+    _ope_percFocus.dispose();
     _gravarFocus.dispose();
     super.dispose();
   }

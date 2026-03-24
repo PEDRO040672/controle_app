@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'for_cid.dart';
 import 'for_tit.dart';
 import 'for_eqp.dart';
+import 'for_ope.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -140,7 +141,7 @@ class _MenuPageState extends State<MenuPage> {
   /// ============================
   Widget _buildDrawer() {
     return Drawer(
-      width: 200,
+      width: 250,
       backgroundColor: Theme.of(context).colorScheme.primary,
       child: ListView(
         padding: EdgeInsets.zero,
@@ -187,17 +188,31 @@ class _MenuPageState extends State<MenuPage> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.person, color: Colors.white),
+            //leading: const Icon(Icons.engineering, color: Colors.white),
+            leading: const Icon(Icons.agriculture, color: Colors.white),
+            title: const Text('Eqptos', style: TextStyle(color: Colors.white)),
+            onTap: () {
+              _abrirModulo(
+                _Modulo(
+                  id: 'foreqp',
+                  titulo: 'Eqptos',
+                  widget: ForEqpPage(onClose: () => _fecharModulo('foreqp')),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.agriculture, color: Colors.white),
             title: const Text(
-              'Equipamentos',
+              'Operadores',
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
               _abrirModulo(
                 _Modulo(
-                  id: 'foreqp',
-                  titulo: 'Equipamentos',
-                  widget: ForEqpPage(onClose: () => _fecharModulo('foreqp')),
+                  id: 'forope',
+                  titulo: 'Operadores',
+                  widget: ForEqpPage(onClose: () => _fecharModulo('forope')),
                 ),
               );
             },

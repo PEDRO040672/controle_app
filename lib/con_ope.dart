@@ -2,36 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:intl/intl.dart';
 
-import '../models/cadeqp_models.dart';
-import 'services/cadeqp_services.dart';
+import '../models/cadope_models.dart';
+import 'services/cadope_services.dart';
 import 'base_cons.dart';
 
-class ConsultaCadeqp extends BaseConsPage {
-  const ConsultaCadeqp({super.key}) : super(titulo: 'Consulta de Equipamentos');
+class ConsultaCadope extends BaseConsPage {
+  const ConsultaCadope({super.key}) : super(titulo: 'Consulta de Operadores');
 
   static Future<int?> abrir(BuildContext context) {
     return showDialog<int>(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return const ConsultaCadeqp();
+        return const ConsultaCadope();
       },
     );
   }
 
   @override
-  State<ConsultaCadeqp> createState() => _ConsultaCadeqpState();
+  State<ConsultaCadope> createState() => _ConsultaCadopeState();
 }
 
-class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
-  final CadeqpServices _eqpServices = CadeqpServices();
+class _ConsultaCadopeState extends BaseConsState<ConsultaCadope> {
+  final CadopeServices _opeServices = CadopeServices();
   final TextEditingController _filtroController = TextEditingController();
   final ScrollController _vertical = ScrollController();
   final ScrollController _horizontal = ScrollController();
-  final formato = NumberFormat('#,##0.0', 'pt_BR');
+  final formato = NumberFormat('#,##0.00', 'pt_BR');
 
-  List<Cadeqp> _lista = [];
-  List<Cadeqp> _filtrada = [];
+  List<Cadope> _lista = [];
+  List<Cadope> _filtrada = [];
 
   bool _loading = true;
   int _selectedIndex = -1;
@@ -52,7 +52,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
   Future<void> carregar() async {
     setState(() => _loading = true);
 
-    final dados = await _eqpServices.getAll();
+    final dados = await _opeServices.getAll();
     if (!mounted) return;
 
     setState(() {
@@ -65,7 +65,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
 
   void _selecionar(int index) {
     if (index >= 0 && index < _filtrada.length) {
-      Navigator.of(context).pop(_filtrada[index].eqp_id);
+      Navigator.of(context).pop(_filtrada[index].ope_id);
     }
   }
 
@@ -78,7 +78,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
 
     setState(() {
       _filtrada = _lista.where((p) {
-        return p.eqp_desc.toLowerCase().contains(t);
+        return p.ope_nome.toLowerCase().contains(t);
       }).toList();
       _selectedIndex = _filtrada.isNotEmpty ? 0 : -1;
     });
@@ -104,7 +104,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
   @override
   void selecionarAtual() {
     if (_selectedIndex >= 0 && _selectedIndex < _filtrada.length) {
-      Navigator.of(context).pop(_filtrada[_selectedIndex].eqp_id);
+      Navigator.of(context).pop(_filtrada[_selectedIndex].ope_id);
     }
   }
 
@@ -169,8 +169,9 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
               DataColumn2(label: Text('ID'), fixedWidth: 70, numeric: true),
               //DataColumn2(label: Text('Nome'), size: ColumnSize.L),
               //DataColumn2(label: Text('Nome'), fixedWidth: 450),
-              DataColumn2(label: Text('Descrição')),
-              DataColumn2(label: Text('HT/KM'), fixedWidth: 120, numeric: true),
+              DataColumn2(label: Text('Nome')),
+              DataColumn2(label: Text('Fixo'), fixedWidth: 120, numeric: true),
+              DataColumn2(label: Text('Perc.'), fixedWidth: 100, numeric: true),
             ],
             rows: List.generate(_filtrada.length, (index) {
               final p = _filtrada[index];
@@ -197,7 +198,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
                 cells: [
                   DataCell(
                     Text(
-                      p.eqp_id.toString(),
+                      p.ope_id.toString(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
@@ -205,7 +206,7 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
                   ),
                   DataCell(
                     Text(
-                      p.eqp_desc,
+                      p.ope_nome,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
@@ -213,8 +214,15 @@ class _ConsultaCadeqpState extends BaseConsState<ConsultaCadeqp> {
                   ),
                   DataCell(
                     Text(
-                      //p.eqp_htkm,
-                      formato.format(p.eqp_htkm),
+                      formato.format(p.ope_fixo),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      formato.format(p.ope_perc),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,

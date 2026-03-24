@@ -113,22 +113,28 @@ class Campo extends StatelessWidget {
       case TipoCampo.double:
         int casas = 0;
         int inteiros = 0;
+        bool moeda = false;
 
         if (mascara != null) {
-          if (mascara!.contains(',')) {
-            final partes = mascara!.split(',');
+          moeda = mascara!.contains('R\$');
+
+          final limpa = mascara!.replaceAll('R\$', '').trim();
+
+          if (limpa.contains(',')) {
+            final partes = limpa.split(',');
             casas = partes[1].length;
             inteiros = partes[0].replaceAll('.', '').length;
           } else {
-            inteiros = mascara!.replaceAll('.', '').length;
+            inteiros = limpa.replaceAll('.', '').length;
           }
         }
 
         return [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9,\.]')),
-          DecimalTextInputFormatter(
+          MoneyTextInputFormatter(
             decimalRange: casas,
             integerRange: inteiros,
+            isCurrency: moeda,
+            allowNegative: true,
           ),
         ];
       case TipoCampo.mascara:
@@ -255,7 +261,11 @@ class Campo extends StatelessWidget {
   static double textDouble(String text) {
     if (text.trim().isEmpty) return 0.0;
 
-    final normalized = text.replaceAll('.', '').replaceAll(',', '.');
+    final normalized = text
+        .replaceAll('R\$', '')
+        .replaceAll(' ', '')
+        .replaceAll('.', '')
+        .replaceAll(',', '.');
 
     return double.tryParse(normalized) ?? 0.0;
   }
@@ -311,13 +321,17 @@ class Campo extends StatelessWidget {
 // ==========================
 // DECIMAL FORMATTER
 // ==========================
-class DecimalTextInputFormatter extends TextInputFormatter {
+class MoneyTextInputFormatter extends TextInputFormatter {
   final int decimalRange;
   final int integerRange;
+  final bool isCurrency;
+  final bool allowNegative;
 
-  DecimalTextInputFormatter({
+  MoneyTextInputFormatter({
     required this.decimalRange,
     required this.integerRange,
+    this.isCurrency = false,
+    this.allowNegative = false,
   });
 
   @override
@@ -327,35 +341,65 @@ class DecimalTextInputFormatter extends TextInputFormatter {
   ) {
     String text = newValue.text;
 
-    // só uma vírgula
-    if (','.allMatches(text).length > 1) return oldValue;
+    // 🔥 detecta negativo (mesmo digitando em qualquer posição)
+    bool isNegative = false;
 
-    // evita só vírgula
-    if (text == ',') return oldValue;
-
-    // corrige ",5" → "0,5"
-    if (text.startsWith(',')) {
-      text = '0$text';
+    if (allowNegative) {
+      if (text.contains('-')) {
+        isNegative = true;
+      }
     }
 
-    final partes = text.split(',');
+    // remove tudo que não for número
+    String digits = text.replaceAll(RegExp(r'\D'), '');
 
-    String inteiro = partes[0];
-    String decimal = partes.length > 1 ? partes[1] : '';
-
-    // 🔥 LIMITA INTEIRO
-    if (integerRange > 0 && inteiro.length > integerRange) {
-      return oldValue;
+    if (digits.isEmpty) {
+      return const TextEditingValue(text: '');
     }
 
-    // 🔥 LIMITA DECIMAL
-    if (decimalRange > 0 && decimal.length > decimalRange) {
-      return oldValue;
+    int maxDigits = integerRange + decimalRange;
+    if (digits.length > maxDigits) {
+      digits = digits.substring(0, maxDigits);
+    }
+
+    // garante tamanho mínimo
+    while (digits.length <= decimalRange) {
+      digits = '0$digits';
+    }
+
+    String inteiro = digits.substring(0, digits.length - decimalRange);
+    String decimal = digits.substring(digits.length - decimalRange);
+
+    // remove zeros à esquerda
+    inteiro = inteiro.replaceFirst(RegExp(r'^0+'), '');
+    if (inteiro.isEmpty) inteiro = '0';
+
+    // limita inteiro
+    if (inteiro.length > integerRange) {
+      inteiro = inteiro.substring(inteiro.length - integerRange);
+    }
+
+    // milhar
+    inteiro = inteiro.replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
+
+    String result = decimalRange > 0 ? '$inteiro,$decimal' : inteiro;
+
+    // adiciona moeda
+    if (isCurrency) {
+      result = 'R\$ $result';
+    }
+
+    // adiciona negativo
+    if (isNegative) {
+      result = '-$result';
     }
 
     return TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
+      text: result,
+      selection: TextSelection.collapsed(offset: result.length),
     );
   }
 }
