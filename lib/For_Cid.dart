@@ -299,9 +299,11 @@ class _ForCidState extends BaseFormState<ForCidPage> {
                 ),
                 const SizedBox(height: 10),
                 Campo(
-                  tipo: TipoCampo.uf,
+                  tipo: TipoCampo.lista,
                   titulo: 'UF',
                   controller: _cid_ufController,
+                  lista:
+                      'AC,AL,AP,AM,BA,CE,DF,ES,GO,MA,MT,MS,MG,PA,PB,PR,PE,PI,RJ,RN,RS,RO,RR,SC,SP,SE,TO',
                   focusNode: _cid_ufFocus,
                   onSubmitted: _valid_cid_uf,
                   nextFocus: _gravarFocus,

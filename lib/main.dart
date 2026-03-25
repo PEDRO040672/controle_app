@@ -202,7 +202,7 @@ class _MenuPageState extends State<MenuPage> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.agriculture, color: Colors.white),
+            leading: const Icon(Icons.engineering, color: Colors.white),
             title: const Text(
               'Operadores',
               style: TextStyle(color: Colors.white),
@@ -212,7 +212,7 @@ class _MenuPageState extends State<MenuPage> {
                 _Modulo(
                   id: 'forope',
                   titulo: 'Operadores',
-                  widget: ForEqpPage(onClose: () => _fecharModulo('forope')),
+                  widget: ForOpePage(onClose: () => _fecharModulo('forope')),
                 ),
               );
             },

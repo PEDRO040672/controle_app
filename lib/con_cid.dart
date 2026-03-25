@@ -73,11 +73,9 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
 
   void _filtrar(String texto) {
     final t = texto.toLowerCase();
-
     setState(() {
       _filtrada = _lista.where((p) {
-        return p.cid_nome.toLowerCase().contains(t) ||
-            p.cid_uf.toLowerCase().contains(t);
+        return p.cid_nome.toLowerCase().contains(t);
       }).toList();
       _selectedIndex = _filtrada.isNotEmpty ? 0 : -1;
     });

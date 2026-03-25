@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum TipoCampo { texto, inteiro, double, data, mascara, uf }
+enum TipoCampo { texto, inteiro, double, data, mascara, lista }
 
 class Campo extends StatelessWidget {
   final TipoCampo tipo;
@@ -12,6 +12,7 @@ class Campo extends StatelessWidget {
   final VoidCallback? onDoubleTap;
   final FocusNode? nextFocus;
   final Future<bool> Function()? onSubmitted;
+  final String? lista;
 
   final int tamanho;
   final bool zeroEsquerda;
@@ -33,6 +34,7 @@ class Campo extends StatelessWidget {
     this.mascara,
     this.enabled = true,
     this.autofocus = false,
+    this.lista,
   });
 
   // ==========================
@@ -56,8 +58,20 @@ class Campo extends StatelessWidget {
       case TipoCampo.data:
         base = '99/99/9999     ';
         break;
-      case TipoCampo.uf:
-        base = 'WWWW';
+      case TipoCampo.lista:
+        final itens = (lista ?? '')
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        if (itens.isEmpty) {
+          base = 'WWWW';
+        } else {
+          // pega o maior texto
+          final maior = itens.reduce((a, b) => a.length > b.length ? a : b);
+          // adiciona uma folga (ícone do dropdown + padding)
+          base = '$maior  ';
+        }
         break;
     }
 
@@ -79,7 +93,7 @@ class Campo extends StatelessWidget {
       case TipoCampo.double:
       case TipoCampo.data:
         return const TextInputType.numberWithOptions(decimal: true);
-      case TipoCampo.uf:
+      case TipoCampo.lista:
         return TextInputType.none;
       default:
         return TextInputType.text;
@@ -144,7 +158,7 @@ class Campo extends StatelessWidget {
       case TipoCampo.data:
         return [MaskTextInputFormatter('99/99/9999')];
 
-      case TipoCampo.uf:
+      case TipoCampo.lista:
         return null;
     }
   }
@@ -161,8 +175,8 @@ class Campo extends StatelessWidget {
         return mascara?.length;
       case TipoCampo.data:
         return 10;
-      case TipoCampo.uf:
-        return 2;
+      case TipoCampo.lista:
+        return null;
       case TipoCampo.double:
         return null; // 👈 importante
     }
@@ -198,7 +212,13 @@ class Campo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (tipo == TipoCampo.uf) {
+    if (tipo == TipoCampo.lista) {
+      final itens = (lista ?? '')
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+
       return SizedBox(
         width: _largura(context) + 30,
         child: DropdownButtonFormField<String>(
@@ -208,8 +228,8 @@ class Campo extends StatelessWidget {
           isDense: true,
           style: _estilo(context),
           decoration: _decoracao(),
-          items: _ufs
-              .map((uf) => DropdownMenuItem(value: uf, child: Text(uf)))
+          items: itens
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
               .toList(),
           onChanged: enabled
               ? (value) {
@@ -286,36 +306,6 @@ class Campo extends StatelessWidget {
 
     return casas > 0 ? '$inteiro,$decimal' : inteiro;
   }
-
-  static const List<String> _ufs = [
-    'AC',
-    'AL',
-    'AP',
-    'AM',
-    'BA',
-    'CE',
-    'DF',
-    'ES',
-    'GO',
-    'MA',
-    'MT',
-    'MS',
-    'MG',
-    'PA',
-    'PB',
-    'PR',
-    'PE',
-    'PI',
-    'RJ',
-    'RN',
-    'RS',
-    'RO',
-    'RR',
-    'SC',
-    'SP',
-    'SE',
-    'TO',
-  ];
 }
 
 // ==========================

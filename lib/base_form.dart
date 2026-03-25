@@ -28,25 +28,23 @@ class BaseFormContainer extends StatelessWidget {
           );
         }
 
-        //return Align(
-        //  alignment: Alignment.topCenter,
-        //  child: Container(
-        //    width: double.infinity,
-        //    padding: const EdgeInsets.all(12),
-        //   decoration: _decoration(context),
-        //    child: child,
-        //  ),
-        //);
         final altura = MediaQuery.of(context).size.height;
         return Align(
           alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 700, maxHeight: altura - 40),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: _decoration(context),
-              child: child,
+          child: Padding(
+            //padding: const EdgeInsets.only(top: 8), // 👈 espaço no topo
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 700,
+                maxHeight: altura - 60, // 👈 ajusta pra compensar o espaço
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(5),
+                decoration: _decoration(context),
+                child: child,
+              ),
             ),
           ),
         );
