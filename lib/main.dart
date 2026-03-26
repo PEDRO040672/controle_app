@@ -130,10 +130,7 @@ class _MenuPageState extends State<MenuPage> {
         _modulosAbertos.clear();
         _moduloAtivoIndex = null;
       });
-    } else if (Platform.isAndroid ||
-        Platform.isWindows ||
-        Platform.isLinux ||
-        Platform.isMacOS) {
+    } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       exit(0);
     } else {
       SystemNavigator.pop();
