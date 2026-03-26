@@ -230,6 +230,9 @@ class _ForHisState extends BaseFormState<ForHisPage> {
 
   //========================[ _valid_his_intervalo ]===========
   Future<bool> _valid_his_intervalo() async {
+    if (_his_ccController.text != "Manutenção") {
+      _his_intervaloController.clear();
+    }
     final valor = Campo.textDouble(_his_intervaloController.text);
     if (valor < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -316,15 +319,20 @@ class _ForHisState extends BaseFormState<ForHisPage> {
                   enabled: !_habilitado,
                 ),
                 const SizedBox(height: 10),
-                Campo(
-                  tipo: TipoCampo.double,
-                  titulo: 'Intervalo',
-                  controller: _his_intervaloController,
-                  focusNode: _his_intervaloFocus,
-                  mascara: '999.999,9',
-                  onSubmitted: _valid_his_intervalo,
-                  nextFocus: _gravarFocus,
-                  enabled: !_habilitado,
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _his_ccController,
+                  builder: (context, value, _) {
+                    return Campo(
+                      tipo: TipoCampo.double,
+                      titulo: 'Intervalo',
+                      controller: _his_intervaloController,
+                      focusNode: _his_intervaloFocus,
+                      mascara: '999.999,9',
+                      onSubmitted: _valid_his_intervalo,
+                      nextFocus: _gravarFocus,
+                      enabled: !_habilitado && value.text == "Manutenção",
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 BotoesFormulario(

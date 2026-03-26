@@ -170,8 +170,16 @@ class _ConsultaCadopeState extends BaseConsState<ConsultaCadope> {
               //DataColumn2(label: Text('Nome'), size: ColumnSize.L),
               //DataColumn2(label: Text('Nome'), fixedWidth: 450),
               DataColumn2(label: Text('Nome')),
-              DataColumn2(label: Text('Fixo'), fixedWidth: 120, numeric: true),
-              DataColumn2(label: Text('Perc.'), fixedWidth: 100, numeric: true),
+              DataColumn2(
+                label: Text('Vl. Fixo'),
+                fixedWidth: 120,
+                numeric: true,
+              ),
+              DataColumn2(
+                label: Text('Perc. %'),
+                fixedWidth: 100,
+                numeric: true,
+              ),
             ],
             rows: List.generate(_filtrada.length, (index) {
               final p = _filtrada[index];

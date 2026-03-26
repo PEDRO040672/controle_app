@@ -328,7 +328,7 @@ class _ForOpeState extends BaseFormState<ForOpePage> {
                 const SizedBox(height: 10),
                 Campo(
                   tipo: TipoCampo.double,
-                  titulo: 'Vl.Fixo',
+                  titulo: 'Vl. Fixo',
                   controller: _ope_fixoController,
                   focusNode: _ope_fixoFocus,
                   mascara: '99.999,99',
@@ -339,7 +339,7 @@ class _ForOpeState extends BaseFormState<ForOpePage> {
                 const SizedBox(height: 10),
                 Campo(
                   tipo: TipoCampo.double,
-                  titulo: 'Perc.%',
+                  titulo: 'Perc. %',
                   controller: _ope_percController,
                   focusNode: _ope_percFocus,
                   mascara: '999,99',

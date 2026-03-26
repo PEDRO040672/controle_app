@@ -52,11 +52,13 @@ class Campo extends StatelessWidget {
         base = 'W' * (tamanho + 3);
         break;
       case TipoCampo.double:
+        base = mascara != null ? '$mascara   ' : 'W' * 12;
+        break;
       case TipoCampo.mascara:
-        base = mascara != null ? '$mascara     ' : 'W' * 12;
+        base = mascara != null ? '$mascara    ' : 'W' * 12;
         break;
       case TipoCampo.data:
-        base = '99/99/9999     ';
+        base = '99/99/9999   ';
         break;
       case TipoCampo.lista:
         final itens = (lista ?? '')
@@ -226,7 +228,11 @@ class Campo extends StatelessWidget {
           focusNode: focusNode,
           autofocus: autofocus,
           isDense: true,
-          style: _estilo(context),
+          style: _estilo(
+            context,
+          ).copyWith(color: enabled ? null : Theme.of(context).disabledColor),
+          iconEnabledColor: Theme.of(context).iconTheme.color,
+          iconDisabledColor: Theme.of(context).disabledColor,
           decoration: _decoracao(),
           items: itens
               .map((item) => DropdownMenuItem(value: item, child: Text(item)))

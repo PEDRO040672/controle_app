@@ -33,15 +33,15 @@ class BaseFormContainer extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: Padding(
             //padding: const EdgeInsets.only(top: 8), // 👈 espaço no topo
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 7),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: 700,
-                maxHeight: altura - 60, // 👈 ajusta pra compensar o espaço
+                maxHeight: altura - 50, // 👈 ajusta pra compensar o espaço
               ),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(7),
                 decoration: _decoration(context),
                 child: child,
               ),
