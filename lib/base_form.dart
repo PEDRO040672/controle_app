@@ -14,13 +14,13 @@ class BaseFormContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 700;
+        final isDesktop = constraints.maxWidth > 800;
 
         if (isDesktop) {
           return Align(
             alignment: Alignment.center,
             child: Container(
-              width: 700,
+              width: 800,
               padding: const EdgeInsets.all(28),
               decoration: _decoration(context),
               child: child,

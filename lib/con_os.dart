@@ -164,15 +164,15 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
             horizontalMargin: 12,
             dataRowHeight: 42,
             headingRowHeight: 46,
-            minWidth: 600,
+            minWidth: 750,
             showCheckboxColumn: false,
             columns: const [
               DataColumn2(label: Text('TR'), fixedWidth: 70, numeric: true),
               DataColumn2(label: Text('OS'), fixedWidth: 70, numeric: true),
-              DataColumn2(label: Text('Situação')),
-              DataColumn2(label: Text('Data')),
-              DataColumn2(label: Text('Titular')),
-              DataColumn2(label: Text('Vl. OS')),
+              DataColumn2(label: Text('Situação'), fixedWidth: 90),
+              DataColumn2(label: Text('Data'), fixedWidth: 130),
+              DataColumn2(label: Text('Titular'), fixedWidth: 240),
+              DataColumn2(label: Text('Vl. OS'), numeric: true),
             ],
             rows: List.generate(_filtrada.length, (index) {
               final p = _filtrada[index];

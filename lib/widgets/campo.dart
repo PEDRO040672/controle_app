@@ -53,10 +53,10 @@ class Campo extends StatelessWidget {
         break;
       case TipoCampo.double:
       case TipoCampo.mascara:
-        base = mascara != null ? '$mascara     ' : 'W' * 12;
+        base = mascara != null ? '$mascara      ' : 'W' * 12;
         break;
       case TipoCampo.data:
-        base = '99/99/9999   ';
+        base = '99/99/9999    ';
         break;
       case TipoCampo.lista:
         final itens = (lista ?? '')
