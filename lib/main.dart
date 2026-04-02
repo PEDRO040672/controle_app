@@ -7,6 +7,7 @@ import 'for_tit.dart';
 import 'for_eqp.dart';
 import 'for_ope.dart';
 import 'for_his.dart';
+import 'for_os.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -230,6 +231,23 @@ class _MenuPageState extends State<MenuPage> {
                   id: 'forhis',
                   titulo: 'Históricos',
                   widget: ForHisPage(onClose: () => _fecharModulo('forhis')),
+                ),
+              );
+            },
+          ),
+          const Divider(color: Colors.white54),
+          ListTile(
+            leading: const Icon(Icons.history, color: Colors.white),
+            title: const Text(
+              'O. Serviços',
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () {
+              _abrirModulo(
+                _Modulo(
+                  id: 'foros',
+                  titulo: 'O. Serviços',
+                  widget: ForOsPage(onClose: () => _fecharModulo('foros')),
                 ),
               );
             },

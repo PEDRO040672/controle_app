@@ -43,6 +43,7 @@ class _ForTitState extends BaseFormState<ForTitPage> {
   final _tit_cidFocus = FocusNode();
   final _cid_nomeFocus = FocusNode();
   final _tit_obsFocus = FocusNode();
+
   final _gravarFocus = FocusNode();
 
   bool _inclusao = true;

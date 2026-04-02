@@ -120,20 +120,15 @@ class Campo extends StatelessWidget {
     switch (tipo) {
       case TipoCampo.texto:
         return [UpperCaseTextFormatter()];
-
       case TipoCampo.inteiro:
         return [FilteringTextInputFormatter.digitsOnly];
-
       case TipoCampo.double:
         int casas = 0;
         int inteiros = 0;
         bool moeda = false;
-
         if (mascara != null) {
           moeda = mascara!.contains('R\$');
-
           final limpa = mascara!.replaceAll('R\$', '').trim();
-
           if (limpa.contains(',')) {
             final partes = limpa.split(',');
             casas = partes[1].length;
@@ -142,7 +137,6 @@ class Campo extends StatelessWidget {
             inteiros = limpa.replaceAll('.', '').length;
           }
         }
-
         return [
           MoneyTextInputFormatter(
             decimalRange: casas,
@@ -154,10 +148,8 @@ class Campo extends StatelessWidget {
       case TipoCampo.mascara:
         if (mascara == null) return null;
         return [MaskTextInputFormatter(mascara!)];
-
       case TipoCampo.data:
         return [MaskTextInputFormatter('99/99/9999')];
-
       case TipoCampo.lista:
         return null;
     }
@@ -191,18 +183,14 @@ class Campo extends StatelessWidget {
         controller.text = controller.text.padLeft(tamanho, '0');
       }
     }
-
     bool podeAvancar = true;
-
     if (onSubmitted != null) {
       podeAvancar = await onSubmitted!();
     }
-
     if (!podeAvancar) {
       focusNode.requestFocus();
       return;
     }
-
     if (nextFocus != null) {
       FocusScope.of(context).requestFocus(nextFocus);
     } else {
@@ -284,31 +272,77 @@ class Campo extends StatelessWidget {
   // ==========================
   static double textDouble(String text) {
     if (text.trim().isEmpty) return 0.0;
-
     final normalized = text
         .replaceAll('R\$', '')
         .replaceAll(' ', '')
         .replaceAll('.', '')
         .replaceAll(',', '.');
-
     return double.tryParse(normalized) ?? 0.0;
   }
 
   static String doubleText(double value, String mascara) {
     final casas = mascara.contains(',') ? mascara.split(',').last.length : 0;
-
     final texto = value.toStringAsFixed(casas);
     final partes = texto.split('.');
-
     String inteiro = partes[0];
     String decimal = partes.length > 1 ? partes[1] : '';
-
     inteiro = inteiro.replaceAllMapped(
       RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
       (m) => '${m[1]}.',
     );
-
     return casas > 0 ? '$inteiro,$decimal' : inteiro;
+  }
+
+  //==================================================
+  // conversor de data para Postgre
+  static String dataToPg(String text) {
+    if (text.trim().isEmpty) return '';
+    final p = text.split('/');
+    if (p.length != 3) return '';
+    return '${p[2]}-${p[1]}-${p[0]}';
+  }
+
+  //==================================================
+  // conversor de data do Postgre para padrão BR
+  static String dataFromPg(String text) {
+    if (text.trim().isEmpty) return '';
+    final p = text.split('-');
+    if (p.length != 3) return '';
+    return '${p[2]}/${p[1]}/${p[0]}';
+  }
+
+  //==================================================
+  // Validação de DATA
+  static bool validaData(String text) {
+    if (text.length != 10) return false;
+    final p = text.split('/');
+    if (p.length != 3) return false;
+    final dia = int.tryParse(p[0]);
+    final mes = int.tryParse(p[1]);
+    final ano = int.tryParse(p[2]);
+    if (dia == null || mes == null || ano == null) return false;
+    if (mes < 1 || mes > 12) return false;
+    if (dia < 1) return false;
+    final ultimoDia = DateTime(ano, mes + 1, 0).day;
+    return dia <= ultimoDia;
+  }
+
+  //==================================================
+  // Validação de HORA
+  static bool validaHora(String text) {
+    if (text.isEmpty) return true;
+    final p = text.split(':');
+    if (p.length < 2 || p.length > 3) return false;
+    final hora = int.tryParse(p[0]);
+    final minuto = int.tryParse(p[1]);
+    final segundo = p.length == 3 ? int.tryParse(p[2]) : 0;
+    if (hora == null || minuto == null) return false;
+    if (hora < 0 || hora > 23) return false;
+    if (minuto < 0 || minuto > 59) return false;
+    if (segundo != null) {
+      if (segundo < 0 || segundo > 59) return false;
+    }
+    return true;
   }
 }
 
