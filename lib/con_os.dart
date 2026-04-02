@@ -169,8 +169,8 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
             columns: const [
               DataColumn2(label: Text('TR'), fixedWidth: 70, numeric: true),
               DataColumn2(label: Text('OS'), fixedWidth: 70, numeric: true),
-              DataColumn2(label: Text('Situação'), fixedWidth: 90),
-              DataColumn2(label: Text('Data'), fixedWidth: 130),
+              DataColumn2(label: Text('Situação'), fixedWidth: 120),
+              DataColumn2(label: Text('Data'), fixedWidth: 150),
               DataColumn2(label: Text('Titular'), fixedWidth: 240),
               DataColumn2(label: Text('Vl. OS'), numeric: true),
             ],

@@ -84,6 +84,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
 
   bool _inclusao = true;
   bool _habilitado = true;
+  bool _situ_blq = false;
   bool _carregando = false;
 
   // ============================================================
@@ -148,6 +149,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
     setState(() {
       _inclusao = true;
       _habilitado = true;
+      _situ_blq = false;
       _limparCampos();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -416,6 +418,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
       setState(() {
         _inclusao = true;
         _habilitado = false;
+        _situ_blq = false;
         _limparCampos();
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -431,8 +434,14 @@ class _ForOsState extends BaseFormState<ForOsPage> {
         setState(() {
           _inclusao = false;
           _habilitado = false;
+
           _os_osController.text = cados.os_os.toString();
           _os_situController.text = cados.os_situ;
+
+          if (_os_situController.text != "Aberto") {
+            _situ_blq = true;
+          }
+
           _os_dataController.text = Campo.dataFromPg(
             cados.os_data.toIso8601String().split('T')[0],
           );
@@ -836,7 +845,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       focusNode: _os_osFocus,
                       nextFocus: _os_situFocus,
                       tamanho: 6,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onSubmitted: _valid_os_os,
                     ),
                     const Spacer(),
@@ -861,7 +870,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       controller: _os_dataController,
                       focusNode: _os_dataFocus,
                       nextFocus: _os_horaFocus,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onSubmitted: _valid_os_data,
                     ),
                     const Spacer(),
@@ -872,7 +881,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       focusNode: _os_horaFocus,
                       nextFocus: _os_hisFocus,
                       mascara: '99:99',
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onSubmitted: _valid_os_hora,
                     ),
                   ],
@@ -888,7 +897,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       focusNode: _os_hisFocus,
                       nextFocus: _os_cidFocus,
                       tamanho: 5,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onDoubleTap: () {
                         _abrirConsultaCadhis();
                       },
@@ -918,7 +927,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       focusNode: _os_cidFocus,
                       nextFocus: _os_titFocus,
                       tamanho: 5,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onDoubleTap: () {
                         _abrirConsultaCadcid();
                       },
@@ -948,7 +957,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       focusNode: _os_titFocus,
                       nextFocus: _os_eqpFocus,
                       tamanho: 5,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onDoubleTap: () {
                         _abrirConsultaCadtit();
                       },
@@ -978,7 +987,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       focusNode: _os_eqpFocus,
                       nextFocus: _os_opeFocus,
                       tamanho: 5,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onDoubleTap: () {
                         _abrirConsultaCadeqp();
                       },
@@ -1008,7 +1017,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       focusNode: _os_opeFocus,
                       nextFocus: _os_obsFocus,
                       tamanho: 5,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                       onDoubleTap: () {
                         _abrirConsultaCadope();
                       },
@@ -1036,7 +1045,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                   focusNode: _os_obsFocus,
                   nextFocus: _os_htkmiFocus,
                   tamanho: 50,
-                  enabled: !_habilitado,
+                  enabled: !_habilitado && !_situ_blq,
                 ),
 
                 const SizedBox(height: 10),
@@ -1050,7 +1059,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       mascara: '999.999,9',
                       onSubmitted: _valid_os_htkmi,
                       nextFocus: _os_htkmfFocus,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                     ),
                     const Spacer(),
                     Campo(
@@ -1061,7 +1070,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       mascara: '999.999,9',
                       onSubmitted: _valid_os_htkmf,
                       nextFocus: _os_vlunitFocus,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                     ),
                   ],
                 ),
@@ -1074,9 +1083,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       titulo: 'Quantidade',
                       controller: _os_qtdController,
                       focusNode: _os_qtdFocus,
-                      //mascara: '999.999,9',
-                      //onSubmitted: _valid_os_htkmi,
-                      //nextFocus: _os_htkmfFocus,
                       enabled: false,
                     ),
                     const Spacer(),
@@ -1088,7 +1094,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       mascara: '999.999,99',
                       onSubmitted: _valid_os_vlunit,
                       nextFocus: _os_vldescFocus,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                     ),
                   ],
                 ),
@@ -1104,7 +1110,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       mascara: '999.999,99',
                       onSubmitted: _valid_os_vldesc,
                       nextFocus: _gravarFocus,
-                      enabled: !_habilitado,
+                      enabled: !_habilitado && !_situ_blq,
                     ),
                     const Spacer(),
                     Campo(
@@ -1122,6 +1128,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                 BotoesFormulario(
                   habilitado: _habilitado,
                   inclusao: _inclusao,
+                  bloqueado: _situ_blq,
                   onGravar: _gravar,
                   onExcluir: _excluir,
                   onCancelar: _cancelar,

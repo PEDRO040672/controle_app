@@ -12,6 +12,7 @@ class BotoesFormulario extends StatelessWidget {
   final Future<void> Function() onExcluir;
   final VoidCallback onCancelar;
   final FocusNode? focusGravar;
+  final bool bloqueado;
 
   const BotoesFormulario({
     super.key,
@@ -21,6 +22,7 @@ class BotoesFormulario extends StatelessWidget {
     required this.onExcluir,
     required this.onCancelar,
     this.focusGravar,
+    this.bloqueado = false,
   });
 
   ButtonStyle _estiloBotao(BuildContext context) {
@@ -92,7 +94,7 @@ class BotoesFormulario extends StatelessWidget {
               /// EXCLUIR
               ElevatedButton(
                 style: estiloBotao,
-                onPressed: (!habilitado && !inclusao)
+                onPressed: (!habilitado && !inclusao && !bloqueado)
                     ? () async {
                         bool confirmar = await MSG(
                           context,
