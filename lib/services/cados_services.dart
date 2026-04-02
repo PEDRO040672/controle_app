@@ -34,25 +34,7 @@ class CadosServices {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cados'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'os_tr': cados.os_tr,
-        'os_os': cados.os_os,
-        'os_situ': cados.os_situ,
-        'os_data': cados.os_data,
-        'os_hora': cados.os_hora,
-        'os_his': cados.os_his,
-        'os_cid': cados.os_cid,
-        'os_tit': cados.os_tit,
-        'os_eqp': cados.os_eqp,
-        'os_ope': cados.os_ope,
-        'os_obs': cados.os_obs,
-        'os_htkmi': cados.os_htkmi,
-        'os_htkmf': cados.os_htkmf,
-        'os_qtd': cados.os_qtd,
-        'os_vlunit': cados.os_vlunit,
-        'os_vldesc': cados.os_vldesc,
-        'os_vltots': cados.os_vltots,
-      }),
+      body: json.encode(cados.toJson()),
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
       final body = json.decode(response.body);
@@ -64,24 +46,7 @@ class CadosServices {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/cados/${cados.os_tr}'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'os_os': cados.os_os,
-        'os_situ': cados.os_situ,
-        'os_data': cados.os_data,
-        'os_hora': cados.os_hora,
-        'os_his': cados.os_his,
-        'os_cid': cados.os_cid,
-        'os_tit': cados.os_tit,
-        'os_eqp': cados.os_eqp,
-        'os_ope': cados.os_ope,
-        'os_obs': cados.os_obs,
-        'os_htkmi': cados.os_htkmi,
-        'os_htkmf': cados.os_htkmf,
-        'os_qtd': cados.os_qtd,
-        'os_vlunit': cados.os_vlunit,
-        'os_vldesc': cados.os_vldesc,
-        'os_vltots': cados.os_vltots,
-      }),
+      body: json.encode(cados.toJson()),
     );
     if (response.statusCode != 200) {
       final body = json.decode(response.body);

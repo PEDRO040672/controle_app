@@ -35,11 +35,7 @@ class CadopeServices {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cadope'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'ope_nome': cadope.ope_nome,
-        'ope_fixo': cadope.ope_fixo,
-        'ope_perc': cadope.ope_perc,
-      }),
+      body: json.encode(cadope.toJson()),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -52,11 +48,7 @@ class CadopeServices {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/cadope/${cadope.ope_id}'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'ope_nome': cadope.ope_nome,
-        'ope_fixo': cadope.ope_fixo,
-        'ope_perc': cadope.ope_perc,
-      }),
+      body: json.encode(cadope.toJson()),
     );
 
     if (response.statusCode != 200) {

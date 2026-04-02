@@ -237,7 +237,7 @@ class _MenuPageState extends State<MenuPage> {
           ),
           const Divider(color: Colors.white54),
           ListTile(
-            leading: const Icon(Icons.history, color: Colors.white),
+            leading: const Icon(Icons.assignment_outlined, color: Colors.white),
             title: const Text(
               'O. Serviços',
               style: TextStyle(color: Colors.white),

@@ -19,7 +19,8 @@ import 'con_eqp.dart';
 import 'con_ope.dart';
 
 class ForOsPage extends BaseFormPage {
-  const ForOsPage({super.key, required super.onClose}) : super(titulo: 'OS');
+  const ForOsPage({super.key, required super.onClose})
+    : super(titulo: 'O. Serviços');
 
   @override
   State<ForOsPage> createState() => _ForOsState();
@@ -503,6 +504,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
       os_os: int.parse(_os_osController.text),
       os_situ: _os_situController.text,
       os_data: DateTime.parse(Campo.dataToPg(_os_dataController.text)),
+      //os_data: Campo.dataToPg(_os_dataController.text),
       os_hora: _os_horaController.text,
       os_his: int.parse(_os_hisController.text),
       his_desc: _his_descController.text,
@@ -837,7 +839,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       enabled: !_habilitado,
                       onSubmitted: _valid_os_os,
                     ),
-                    SizedBox(width: 10),
+                    const Spacer(),
                     Campo(
                       tipo: TipoCampo.lista,
                       titulo: 'Situação',
@@ -862,7 +864,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       enabled: !_habilitado,
                       onSubmitted: _valid_os_data,
                     ),
-                    SizedBox(width: 10),
+                    const Spacer(),
                     Campo(
                       tipo: TipoCampo.mascara,
                       titulo: 'Hora',
@@ -1050,7 +1052,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       nextFocus: _os_htkmfFocus,
                       enabled: !_habilitado,
                     ),
-                    SizedBox(width: 10),
+                    const Spacer(),
                     Campo(
                       tipo: TipoCampo.double,
                       titulo: 'HT/KM f',
@@ -1077,7 +1079,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       //nextFocus: _os_htkmfFocus,
                       enabled: false,
                     ),
-                    SizedBox(width: 10),
+                    const Spacer(),
                     Campo(
                       tipo: TipoCampo.double,
                       titulo: 'Vl. Unit.',
@@ -1104,7 +1106,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
                       nextFocus: _gravarFocus,
                       enabled: !_habilitado,
                     ),
-                    SizedBox(width: 10),
+                    const Spacer(),
                     Campo(
                       tipo: TipoCampo.double,
                       titulo: 'VL. Total',

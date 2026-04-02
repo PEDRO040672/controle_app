@@ -35,11 +35,7 @@ class CadhisServices {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cadhis'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'his_desc': cadhis.his_desc,
-        'his_cc': cadhis.his_cc,
-        'his_intervalo': cadhis.his_intervalo,
-      }),
+      body: json.encode(cadhis.toJson()),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -52,11 +48,7 @@ class CadhisServices {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/cadhis/${cadhis.his_id}'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'his_desc': cadhis.his_desc,
-        'his_cc': cadhis.his_cc,
-        'his_intervalo': cadhis.his_intervalo,
-      }),
+      body: json.encode(cadhis.toJson()),
     );
 
     if (response.statusCode != 200) {

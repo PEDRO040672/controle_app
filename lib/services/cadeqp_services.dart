@@ -35,10 +35,7 @@ class CadeqpServices {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cadeqp'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'eqp_desc': cadeqp.eqp_desc,
-        'eqp_htkm': cadeqp.eqp_htkm,
-      }),
+      body: json.encode(cadeqp.toJson()),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -51,10 +48,7 @@ class CadeqpServices {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/cadeqp/${cadeqp.eqp_id}'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'eqp_desc': cadeqp.eqp_desc,
-        'eqp_htkm': cadeqp.eqp_htkm,
-      }),
+      body: json.encode(cadeqp.toJson()),
     );
 
     if (response.statusCode != 200) {

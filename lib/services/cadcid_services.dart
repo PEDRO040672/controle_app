@@ -35,7 +35,7 @@ class CadcidServices {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cadcid'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({'cid_nome': cadcid.cid_nome, 'cid_uf': cadcid.cid_uf}),
+      body: json.encode(cadcid.toJson()),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -48,7 +48,7 @@ class CadcidServices {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/cadcid/${cadcid.cid_id}'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({'cid_nome': cadcid.cid_nome, 'cid_uf': cadcid.cid_uf}),
+      body: json.encode(cadcid.toJson()),
     );
 
     if (response.statusCode != 200) {

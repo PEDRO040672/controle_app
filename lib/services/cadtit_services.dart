@@ -34,16 +34,7 @@ class CadtitServices {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cadtit'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'tit_nome': cadtit.tit_nome,
-        'tit_doc': cadtit.tit_doc,
-        'tit_fone': cadtit.tit_fone,
-        'tit_end': cadtit.tit_end,
-        'tit_bai': cadtit.tit_bai,
-        'tit_cep': cadtit.tit_cep,
-        'tit_cid': cadtit.tit_cid,
-        'tit_obs': cadtit.tit_obs,
-      }),
+      body: json.encode(cadtit.toJson()),
     );
     if (response.statusCode != 200 && response.statusCode != 201) {
       final body = json.decode(response.body);
@@ -55,16 +46,7 @@ class CadtitServices {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/cadtit/${cadtit.tit_id}'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'tit_nome': cadtit.tit_nome,
-        'tit_doc': cadtit.tit_doc,
-        'tit_fone': cadtit.tit_fone,
-        'tit_end': cadtit.tit_end,
-        'tit_bai': cadtit.tit_bai,
-        'tit_cep': cadtit.tit_cep,
-        'tit_cid': cadtit.tit_cid,
-        'tit_obs': cadtit.tit_obs,
-      }),
+      body: json.encode(cadtit.toJson()),
     );
 
     if (response.statusCode != 200) {
