@@ -1,6 +1,5 @@
 class Cados {
   final int os_tr;
-  final int os_os;
   final String os_situ;
   final DateTime os_data;
   final String os_hora;
@@ -24,7 +23,6 @@ class Cados {
 
   Cados({
     required this.os_tr,
-    required this.os_os,
     required this.os_situ,
     required this.os_data,
     required this.os_hora,
@@ -50,7 +48,6 @@ class Cados {
   factory Cados.fromJson(Map<String, dynamic> json) {
     return Cados(
       os_tr: json['os_tr'],
-      os_os: json['os_os'],
       os_situ: json['os_situ'],
       os_data: DateTime.parse(json['os_data']),
       os_hora: json['os_hora'],
@@ -76,7 +73,6 @@ class Cados {
 
   Map<String, dynamic> toJson() => {
     'os_tr': os_tr,
-    'os_os': os_os,
     'os_situ': os_situ,
     'os_data': os_data.toIso8601String().split('T')[0],
     'os_hora': os_hora,

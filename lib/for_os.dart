@@ -20,7 +20,7 @@ import 'con_ope.dart';
 
 class ForOsPage extends BaseFormPage {
   const ForOsPage({super.key, required super.onClose})
-    : super(titulo: 'O. Serviços');
+    : super(titulo: 'Ordens de Serviços');
 
   @override
   State<ForOsPage> createState() => _ForOsState();
@@ -35,7 +35,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
   final CadopeServices _opeServices = CadopeServices();
 
   final _os_trController = TextEditingController();
-  final _os_osController = TextEditingController();
   final _os_situController = TextEditingController();
   final _os_dataController = TextEditingController();
   final _os_horaController = TextEditingController();
@@ -58,7 +57,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
   final _os_vltotsController = TextEditingController();
 
   final _os_trFocus = FocusNode();
-  final _os_osFocus = FocusNode();
   final _os_situFocus = FocusNode();
   final _os_dataFocus = FocusNode();
   final _os_horaFocus = FocusNode();
@@ -87,6 +85,65 @@ class _ForOsState extends BaseFormState<ForOsPage> {
   bool _situ_blq = false;
   bool _carregando = false;
 
+  String _montarTextoCompartilhar() {
+    final desconto = _os_vldescController.text.trim();
+    final mostrarDesconto =
+        desconto.isNotEmpty &&
+        desconto != '0' &&
+        desconto != '0,00' &&
+        desconto != '0.00';
+    final descontoLinha = mostrarDesconto ? 'Desconto: - $desconto\n' : '';
+    // 👇 regra do cliente
+    final mostrarCliente = _os_titController.text.trim() != '1';
+    final clienteLinha = mostrarCliente
+        ? 'Cliente: ${_tit_nomeController.text}'
+        : '';
+    final mostrarObs = _os_obsController.text.trim() != '';
+    final obsLinha = mostrarObs
+        ? 'Observação: ${_os_obsController.text}\n'
+        : '';
+    return '''
+ORDEM DE SERVIÇO
+
+OS: ${_os_trController.text}
+${_os_dataController.text} - ${_os_horaController.text}
+$clienteLinha
+Serviço: ${_his_descController.text}
+Cidade: ${_cid_nomeController.text}
+Eqpto: ${_eqp_descController.text}
+Ope.: ${_ope_nomeController.text}
+$obsLinha
+Inicial: ${_os_htkmiController.text}
+Final: ${_os_htkmfController.text}
+Quantidade: ${_os_qtdController.text}
+Vl. Unitário: ${_os_vlunitController.text}
+$descontoLinha
+TOTAL: R\$ ${_os_vltotsController.text}
+
+====================
+Dados para Pagamento:
+PEDRO ROGÉRIO AZEVEDO
+Banco BTG Pactual
+
+Chave PIX CPF:
+58887458120
+
+TOTAL: R\$ ${_os_vltotsController.text}
+''';
+  }
+
+  Future<void> _compartilhar() async {
+    final texto = _montarTextoCompartilhar();
+    await Clipboard.setData(ClipboardData(text: texto));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Texto copiado! Cole no WhatsApp com Ctrl + V'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   // ============================================================
   // LOADING
   // ============================================================
@@ -98,6 +155,15 @@ class _ForOsState extends BaseFormState<ForOsPage> {
     if (mounted) {
       setState(() => _carregando = false);
     }
+  }
+
+  // ============================================================
+  // botão compartilhar
+  // ============================================================
+  @override
+  VoidCallback? buildShareAction() {
+    if (_os_trController.text.isEmpty) return null;
+    return _compartilhar;
   }
 
   // ============================================================
@@ -118,7 +184,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
   // ============================================================
   void _limparCampos() {
     _os_trController.clear();
-    _os_osController.clear();
     _os_situController.clear();
     _os_dataController.clear();
     _os_horaController.clear();
@@ -422,7 +487,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
         _limparCampos();
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _os_osFocus.requestFocus();
+        if (mounted) _os_situFocus.requestFocus();
       });
       return;
     }
@@ -435,13 +500,10 @@ class _ForOsState extends BaseFormState<ForOsPage> {
           _inclusao = false;
           _habilitado = false;
 
-          _os_osController.text = cados.os_os.toString();
           _os_situController.text = cados.os_situ;
-
           if (_os_situController.text != "Aberto") {
             _situ_blq = true;
           }
-
           _os_dataController.text = Campo.dataFromPg(
             cados.os_data.toIso8601String().split('T')[0],
           );
@@ -480,7 +542,7 @@ class _ForOsState extends BaseFormState<ForOsPage> {
           );
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _os_osFocus.requestFocus();
+          if (mounted) _os_situFocus.requestFocus();
         });
       } else {
         await MSG(context, 'Aviso', 'Registro não encontrado.', 1);
@@ -498,7 +560,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
   // GRAVAR
   // ============================================================
   Future<void> _gravar() async {
-    if (!await _valid_os_os()) return;
     if (!await _valid_os_data()) return;
     if (!await _valid_os_hora()) return;
     if (!await _valid_os_htkmi()) return;
@@ -510,7 +571,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
     final codigo = int.tryParse(_os_trController.text) ?? 0;
     final cados = Cados(
       os_tr: codigo,
-      os_os: int.parse(_os_osController.text),
       os_situ: _os_situController.text,
       os_data: DateTime.parse(Campo.dataToPg(_os_dataController.text)),
       //os_data: Campo.dataToPg(_os_dataController.text),
@@ -642,23 +702,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
       _os_opeController.text = idSelecionado.toString();
       await _carregarCadope();
     }
-  }
-
-  //========================[ _valid_os_os ]===========
-  Future<bool> _valid_os_os() async {
-    _os_obsController.text = _os_obsController.text.trim();
-    final codigo = int.tryParse(_os_osController.text) ?? 0;
-    if (codigo <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('O campo OS, deve ser informado.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      _os_osFocus.requestFocus(); // volta foco no campo
-      return false;
-    }
-    return true;
   }
 
   //========================[ _valid_os_data ]===========
@@ -818,35 +861,23 @@ class _ForOsState extends BaseFormState<ForOsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Campo(
-                  tipo: TipoCampo.inteiro,
-                  titulo: 'TR [2c/F2]',
-                  controller: _os_trController,
-                  focusNode: _os_trFocus,
-                  nextFocus: _os_osFocus,
-                  tamanho: 6,
-                  enabled: _habilitado,
-                  onDoubleTap: () {
-                    _abrirConsulta();
-                  },
-                  onSubmitted: () async {
-                    await _carregarCados();
-                    return true;
-                  },
-                ),
-
-                const SizedBox(height: 10),
                 Row(
                   children: [
                     Campo(
                       tipo: TipoCampo.inteiro,
-                      titulo: 'OS',
-                      controller: _os_osController,
-                      focusNode: _os_osFocus,
+                      titulo: 'TR [2c/F2]',
+                      controller: _os_trController,
+                      focusNode: _os_trFocus,
                       nextFocus: _os_situFocus,
                       tamanho: 6,
-                      enabled: !_habilitado && !_situ_blq,
-                      onSubmitted: _valid_os_os,
+                      enabled: _habilitado,
+                      onDoubleTap: () {
+                        _abrirConsulta();
+                      },
+                      onSubmitted: () async {
+                        await _carregarCados();
+                        return true;
+                      },
                     ),
                     const Spacer(),
                     Campo(
@@ -1160,7 +1191,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
   @override
   void dispose() {
     _os_trController.dispose();
-    _os_osController.dispose();
     _os_situController.dispose();
     _os_dataController.dispose();
     _os_horaController.dispose();
@@ -1183,7 +1213,6 @@ class _ForOsState extends BaseFormState<ForOsPage> {
     _os_vltotsController.dispose();
 
     _os_trFocus.dispose();
-    _os_osFocus.dispose();
     _os_situFocus.dispose();
     _os_dataFocus.dispose();
     _os_horaFocus.dispose();

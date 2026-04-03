@@ -81,6 +81,7 @@ abstract class BaseFormPage extends StatefulWidget {
 
 abstract class BaseFormState<T extends BaseFormPage> extends State<T> {
   final FocusScopeNode _formFocusScope = FocusScopeNode();
+  VoidCallback? buildShareAction() => null;
 
   /// Corpo do formulário
   Widget buildBody(BuildContext context);
@@ -125,6 +126,7 @@ abstract class BaseFormState<T extends BaseFormPage> extends State<T> {
                   BaseFormHeader(
                     titulo: widget.titulo,
                     onClose: widget.onClose,
+                    onShare: buildShareAction(),
                   ),
                   const SizedBox(height: 24),
                   buildBody(context),
@@ -146,12 +148,14 @@ abstract class BaseFormState<T extends BaseFormPage> extends State<T> {
 class BaseFormHeader extends StatelessWidget {
   final String titulo;
   final VoidCallback onClose;
+  final VoidCallback? onShare; // 👈 NOVO
 
   //const _FormHeader({required this.titulo, required this.onClose});
   const BaseFormHeader({
     super.key,
     required this.titulo,
     required this.onClose,
+    this.onShare, // 👈 NOVO
   });
 
   @override
@@ -193,6 +197,18 @@ class BaseFormHeader extends StatelessWidget {
               ),
             ),
           ),
+
+          // 👇 BOTÃO COMPARTILHAR (OPCIONAL)
+          if (onShare != null)
+            IconButton(
+              onPressed: onShare,
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.white30,
+                shape: const CircleBorder(),
+              ),
+              icon: const Icon(Icons.share),
+              color: Colors.white,
+            ),
         ],
       ),
     );

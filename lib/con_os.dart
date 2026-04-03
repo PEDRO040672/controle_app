@@ -5,9 +5,11 @@ import 'package:intl/intl.dart';
 import '../models/cados_models.dart';
 import 'services/cados_services.dart';
 import 'base_cons.dart';
+import '../widgets/campo.dart';
 
 class ConsultaCados extends BaseConsPage {
   const ConsultaCados({super.key}) : super(titulo: 'Consulta de OS');
+
   static Future<int?> abrir(BuildContext context) {
     return showDialog<int>(
       context: context,
@@ -24,9 +26,10 @@ class ConsultaCados extends BaseConsPage {
 
 class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
   final CadosServices _osServices = CadosServices();
-  final TextEditingController _filtroController = TextEditingController();
+
   final ScrollController _vertical = ScrollController();
   final ScrollController _horizontal = ScrollController();
+
   final formato = NumberFormat('#,##0.00', 'pt_BR');
   final formatoData = DateFormat('dd/MM/yyyy');
 
@@ -36,18 +39,43 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
   bool _loading = true;
   int _selectedIndex = -1;
 
+  /// CONTROLLERS FILTRO
+  final _titularController = TextEditingController();
+  final _situacaoController = TextEditingController(text: 'Todas');
+  final _dataIniController = TextEditingController();
+  final _dataFimController = TextEditingController();
+  final _totalController = TextEditingController();
+
+  final _titularFocus = FocusNode();
+  final _situacaoFocus = FocusNode();
+  final _dataIniFocus = FocusNode();
+  final _dataFimFocus = FocusNode();
+
   @override
   void dispose() {
-    _filtroController.dispose();
     _vertical.dispose();
     _horizontal.dispose();
+
+    _titularController.dispose();
+    _situacaoController.dispose();
+    _dataIniController.dispose();
+    _dataFimController.dispose();
+    _totalController.dispose();
+
     super.dispose();
   }
 
-  /// ===============================
-  /// CARREGAR DADOS
-  /// ===============================
+  //==================================================
+  @override
+  void initState() {
+    super.initState();
+    final hoje = DateTime.now();
+    final dataInicial = DateTime(hoje.year, hoje.month, 1);
+    _dataIniController.text = DateFormat('dd/MM/yyyy').format(dataInicial);
+    _dataFimController.text = DateFormat('dd/MM/yyyy').format(hoje);
+  }
 
+  /// CARREGAR
   @override
   Future<void> carregar() async {
     setState(() => _loading = true);
@@ -61,39 +89,94 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
       _loading = false;
       _selectedIndex = _filtrada.isNotEmpty ? 0 : -1;
     });
+
+    _filtrar(); // <-- AQUI
   }
 
+  /// TOTAL
+  void _calcularTotal() {
+    double total = 0;
+    for (var item in _filtrada) {
+      total += item.os_vltots;
+    }
+
+    _totalController.text = Campo.doubleText(total, '999.999.999,99');
+  }
+
+  /// FILTRO
+  void _filtrar() {
+    final nome = _titularController.text.toLowerCase();
+    final situ = _situacaoController.text;
+
+    DateTime? dataIni;
+    DateTime? dataFim;
+
+    if (Campo.validaData(_dataIniController.text)) {
+      final p = _dataIniController.text.split('/');
+      dataIni = DateTime(int.parse(p[2]), int.parse(p[1]), int.parse(p[0]));
+    }
+
+    if (Campo.validaData(_dataFimController.text)) {
+      final p = _dataFimController.text.split('/');
+      dataFim = DateTime(int.parse(p[2]), int.parse(p[1]), int.parse(p[0]));
+    }
+    setState(() {
+      _filtrada = _lista.where((p) {
+        bool ok = true;
+
+        if (nome.isNotEmpty) {
+          ok &= p.tit_nome.toLowerCase().contains(nome);
+        }
+
+        if (situ.isNotEmpty && situ != 'Todas') {
+          ok &= p.os_situ == situ;
+        }
+
+        final data = DateTime(p.os_data.year, p.os_data.month, p.os_data.day);
+
+        if (dataIni != null) {
+          ok &= !data.isBefore(dataIni);
+        }
+
+        if (dataFim != null) {
+          ok &= !data.isAfter(dataFim);
+        }
+        return ok;
+      }).toList();
+
+      _selectedIndex = _filtrada.isNotEmpty ? 0 : -1;
+    });
+
+    _calcularTotal();
+  }
+
+  void _limpar() {
+    _titularController.clear();
+    _situacaoController.text = 'Todas';
+    _dataIniController.clear();
+    _dataFimController.clear();
+    //final hoje = DateTime.now();
+    //final dataInicial = DateTime(hoje.year, hoje.month, 1);
+    //_dataIniController.text = DateFormat('dd/MM/yyyy').format(dataInicial);
+    //_dataFimController.text = DateFormat('dd/MM/yyyy').format(hoje);
+    _filtrar();
+  }
+
+  /// NAVEGAÇÃO
   void _selecionar(int index) {
     if (index >= 0 && index < _filtrada.length) {
       Navigator.of(context).pop(_filtrada[index].os_tr);
     }
   }
 
-  /// ===============================
-  /// FILTRO
-  /// ===============================
-
-  void _filtrar(String texto) {
-    final t = texto.toLowerCase();
-
-    setState(() {
-      _filtrada = _lista.where((p) {
-        return p.tit_nome.toLowerCase().contains(t);
-      }).toList();
-      _selectedIndex = _filtrada.isNotEmpty ? 0 : -1;
-    });
-  }
-
-  /// ===============================
-  /// NAVEGAÇÃO
-  /// ===============================
-
   @override
   void mover(int delta) {
     if (_filtrada.isEmpty) return;
+
     setState(() {
       _selectedIndex = (_selectedIndex + delta).clamp(0, _filtrada.length - 1);
     });
+
     _vertical.animateTo(
       _selectedIndex * 42,
       duration: const Duration(milliseconds: 150),
@@ -108,23 +191,86 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
     }
   }
 
-  /// ===============================
-  /// UI
-  /// ===============================
-
+  /// FILTRO UI
   @override
   Widget buildFiltro(BuildContext context) {
-    return TextField(
-      focusNode: filtroFocus,
-      controller: _filtroController,
-      decoration: const InputDecoration(
-        labelText: 'Pesquisar...',
-        prefixIcon: Icon(Icons.search),
-      ),
-      onChanged: _filtrar,
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      alignment: WrapAlignment.spaceBetween, // 👈 JUSTIFICADO
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Campo(
+          tipo: TipoCampo.texto,
+          titulo: 'Titular',
+          controller: _titularController,
+          focusNode: _titularFocus,
+          nextFocus: _situacaoFocus,
+          tamanho: 24,
+          onChanged: (_) => _filtrar(),
+        ),
+        Campo(
+          tipo: TipoCampo.lista,
+          titulo: 'Situação',
+          controller: _situacaoController,
+          focusNode: _situacaoFocus,
+          nextFocus: _dataIniFocus,
+          lista: 'Todas,Aberto,Fechado,Quitado,P.Parcial',
+          onChanged: (_) => _filtrar(),
+        ),
+        Campo(
+          tipo: TipoCampo.data,
+          titulo: 'Data Inicial',
+          controller: _dataIniController,
+          focusNode: _dataIniFocus,
+          nextFocus: _dataFimFocus,
+          onChanged: (_) => _filtrar(),
+        ),
+        Campo(
+          tipo: TipoCampo.data,
+          titulo: 'Data Final',
+          controller: _dataFimController,
+          focusNode: _dataFimFocus,
+          onChanged: (_) => _filtrar(),
+        ),
+        Campo(
+          tipo: TipoCampo.double,
+          titulo: 'Total',
+          controller: _totalController,
+          focusNode: FocusNode(),
+          enabled: false,
+          mascara: '99.999.999,99',
+        ),
+        SizedBox(
+          height: 38,
+          child: ElevatedButton.icon(
+            onPressed: _filtrar,
+            icon: const Icon(Icons.search, size: 18),
+            label: const Text('Filtrar'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              minimumSize: const Size(0, 38),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 38,
+          //child: OutlinedButton.icon(
+          child: ElevatedButton.icon(
+            onPressed: _limpar,
+            icon: const Icon(Icons.clear, size: 18),
+            label: const Text('Limpar'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              minimumSize: const Size(0, 38),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
+  /// TABELA
   @override
   Widget buildTabela(BuildContext context) {
     if (_loading) {
@@ -141,7 +287,6 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
         trackVisibility: true,
         notificationPredicate: (notification) =>
             notification.metrics.axis == Axis.horizontal,
-
         child: Theme(
           data: Theme.of(context).copyWith(
             dataTableTheme: DataTableThemeData(
@@ -168,15 +313,26 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
             showCheckboxColumn: false,
             columns: const [
               DataColumn2(label: Text('TR'), fixedWidth: 70, numeric: true),
-              DataColumn2(label: Text('OS'), fixedWidth: 70, numeric: true),
               DataColumn2(label: Text('Situação'), fixedWidth: 120),
               DataColumn2(label: Text('Data'), fixedWidth: 150),
-              DataColumn2(label: Text('Titular'), fixedWidth: 240),
+              DataColumn2(label: Text('Titular'), fixedWidth: 210),
               DataColumn2(label: Text('Vl. OS'), numeric: true),
             ],
             rows: List.generate(_filtrada.length, (index) {
               final p = _filtrada[index];
               final isSelected = index == _selectedIndex;
+
+              Widget cell(String text) {
+                return Tooltip(
+                  message: text,
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                );
+              }
 
               return DataRow2(
                 selected: isSelected,
@@ -191,60 +347,14 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
                       context,
                     ).colorScheme.primary.withOpacity(0.18);
                   }
-                  if (isDesktop && states.contains(WidgetState.hovered)) {
-                    return Colors.grey.withOpacity(0.08);
-                  }
                   return null;
                 }),
                 cells: [
-                  DataCell(
-                    Text(
-                      p.os_tr.toString(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      p.os_os.toString(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      p.os_situ,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      formatoData.format(p.os_data),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      p.tit_nome,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      formato.format(p.os_vltots),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  ),
+                  DataCell(cell(p.os_tr.toString())),
+                  DataCell(cell(p.os_situ)),
+                  DataCell(cell(formatoData.format(p.os_data))),
+                  DataCell(cell(p.tit_nome)),
+                  DataCell(cell(formato.format(p.os_vltots))),
                 ],
               );
             }),

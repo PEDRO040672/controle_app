@@ -148,14 +148,17 @@ class _MenuPageState extends State<MenuPage> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            child: Center(
-              child: Text(
-                'Controle',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 100, // <-- altura do "quadrado" do Controle
+            child: const DrawerHeader(
+              child: Center(
+                child: Text(
+                  'Controle',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

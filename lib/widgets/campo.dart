@@ -12,6 +12,7 @@ class Campo extends StatelessWidget {
   final VoidCallback? onDoubleTap;
   final FocusNode? nextFocus;
   final Future<bool> Function()? onSubmitted;
+  final ValueChanged<String>? onChanged;
   final String? lista;
 
   final int tamanho;
@@ -29,6 +30,7 @@ class Campo extends StatelessWidget {
     this.onDoubleTap,
     this.nextFocus,
     this.onSubmitted,
+    this.onChanged,
     this.tamanho = 50,
     this.zeroEsquerda = false,
     this.mascara,
@@ -226,6 +228,7 @@ class Campo extends StatelessWidget {
           onChanged: enabled
               ? (value) {
                   controller.text = value ?? '';
+                  onChanged?.call(controller.text);
                   _handleSubmit(context);
                 }
               : null,
@@ -249,6 +252,7 @@ class Campo extends StatelessWidget {
           textInputAction: TextInputAction.next,
           inputFormatters: _formatters(),
           onSubmitted: (_) => _handleSubmit(context),
+          onChanged: onChanged,
           decoration: _decoracao(),
         ),
       ),
