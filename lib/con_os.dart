@@ -215,7 +215,7 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
           controller: _situacaoController,
           focusNode: _situacaoFocus,
           nextFocus: _dataIniFocus,
-          lista: 'Todas,Aberto,Fechado,Quitado,P.Parcial',
+          lista: 'Todas,Aberto,Fechado,Quitado,Parcial',
           onChanged: (_) => _filtrar(),
         ),
         Campo(

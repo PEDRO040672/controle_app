@@ -221,8 +221,6 @@ class _ForTitState extends BaseFormState<ForTitPage> {
   // ============================================================
   Future<void> _gravar() async {
     if (!await _valid_tit_nome()) return;
-    if (!await _valid_tit_fone()) return;
-    //if (!await _carregarCadcid()) return;
 
     //--------[ Se PASSOU nas Validações, CONTINUA ]------------
     final codigo = int.tryParse(_tit_idController.text) ?? 0;
@@ -321,22 +319,6 @@ class _ForTitState extends BaseFormState<ForTitPage> {
     return true;
   }
 
-  //========================[ _valid_tit_uf ]===========
-  Future<bool> _valid_tit_fone() async {
-    _tit_foneController.text = _tit_foneController.text.trim();
-    if (_tit_foneController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('O campo Fone está vazio.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      _tit_foneFocus.requestFocus(); // volta foco no campo
-      return false;
-    }
-    return true;
-  }
-
   // ============================================================
   // UI
   // ============================================================
@@ -418,7 +400,6 @@ class _ForTitState extends BaseFormState<ForTitPage> {
                   titulo: 'Fone',
                   controller: _tit_foneController,
                   focusNode: _tit_foneFocus,
-                  onSubmitted: _valid_tit_fone,
                   nextFocus: _tit_endFocus,
                   mascara: '(99) ?9999-9999',
                   enabled: !_habilitado,

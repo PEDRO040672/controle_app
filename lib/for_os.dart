@@ -86,6 +86,12 @@ class _ForOsState extends BaseFormState<ForOsPage> {
   bool _carregando = false;
 
   String _montarTextoCompartilhar() {
+    // 👇 regra da Observação
+    final mostrarObs = _os_obsController.text.trim() != '';
+    final obsLinha = mostrarObs
+        ? 'Observação: ${_os_obsController.text}\n'
+        : '';
+    // 👇 regra do desconto
     final desconto = _os_vldescController.text.trim();
     final mostrarDesconto =
         desconto.isNotEmpty &&
@@ -93,21 +99,12 @@ class _ForOsState extends BaseFormState<ForOsPage> {
         desconto != '0,00' &&
         desconto != '0.00';
     final descontoLinha = mostrarDesconto ? 'Desconto: - $desconto\n' : '';
-    // 👇 regra do cliente
-    final mostrarCliente = _os_titController.text.trim() != '1';
-    final clienteLinha = mostrarCliente
-        ? 'Cliente: ${_tit_nomeController.text}'
-        : '';
-    final mostrarObs = _os_obsController.text.trim() != '';
-    final obsLinha = mostrarObs
-        ? 'Observação: ${_os_obsController.text}\n'
-        : '';
     return '''
 ORDEM DE SERVIÇO
 
 OS: ${_os_trController.text}
 ${_os_dataController.text} - ${_os_horaController.text}
-$clienteLinha
+
 Serviço: ${_his_descController.text}
 Cidade: ${_cid_nomeController.text}
 Eqpto: ${_eqp_descController.text}
@@ -183,9 +180,9 @@ TOTAL: R\$ ${_os_vltotsController.text}
   // LIMPAR
   // ============================================================
   void _limparCampos() {
-    _os_trController.clear();
     _os_situController.clear();
     _os_dataController.clear();
+    _os_trController.clear();
     _os_horaController.clear();
     _os_hisController.clear();
     _his_descController.clear();
@@ -485,6 +482,14 @@ TOTAL: R\$ ${_os_vltotsController.text}
         _habilitado = false;
         _situ_blq = false;
         _limparCampos();
+        _os_dataController.text = Campo.dataFromPg(
+          DateTime.now().toIso8601String().split('T')[0],
+        );
+        _os_horaController.text = DateTime.now()
+            .toIso8601String()
+            .split('T')[1]
+            .substring(0, 5);
+        _os_situController.text = "Aberto";
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _os_situFocus.requestFocus();
