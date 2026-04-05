@@ -8,7 +8,6 @@ import 'for_eqp.dart';
 import 'for_ope.dart';
 import 'for_his.dart';
 import 'for_os.dart';
-import 'for_apr.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -256,22 +255,7 @@ class _MenuPageState extends State<MenuPage> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.assignment_outlined, color: Colors.white),
-            title: const Text(
-              'A Pagar/Receber',
-              style: TextStyle(color: Colors.white),
-            ),
-            onTap: () {
-              _abrirModulo(
-                _Modulo(
-                  id: 'forapr',
-                  titulo: 'A Pagar/Receber',
-                  widget: ForApr(onClose: () => _fecharModulo('forapr')),
-                ),
-              );
-            },
-          ),
+
           const Divider(color: Colors.white54),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.white),
