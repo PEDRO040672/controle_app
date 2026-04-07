@@ -552,12 +552,12 @@ TOTAL: R\$ ${_os_vltotsController.text}
         });
       } else {
         await MSG(context, 'Aviso', 'Registro não encontrado.', 1);
-        _cancelar();
       }
     } catch (e) {
       if (!mounted) return;
       await MSG(context, 'Erro', '$e', 1);
     } finally {
+      _cancelar();
       _finalizarCarregamento();
     }
   }

@@ -35,7 +35,7 @@ class CadaprServices {
     required Map<String, dynamic> cabecalho,
     required List<Map<String, dynamic>> itens,
     required List<Map<String, dynamic>> parcelas,
-    required bool quitarTotal,
+    //required bool quitarTotal,
   }) async {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/cadapr'),
@@ -44,7 +44,7 @@ class CadaprServices {
         "cabecalho": cabecalho,
         "itens": itens,
         "parcelas": parcelas,
-        "quitar_total": quitarTotal,
+        //"quitar_total": quitarTotal,
       }),
     );
 
@@ -59,7 +59,7 @@ class CadaprServices {
     required Map<String, dynamic> cabecalho,
     required List<Map<String, dynamic>> itens,
     required List<Map<String, dynamic>> parcelas,
-    required bool quitarTotal,
+    //required bool quitarTotal,
   }) async {
     final response = await http.put(
       Uri.parse('${ApiConfig.baseUrl}/cadapr/$apr_tr'),
@@ -68,7 +68,7 @@ class CadaprServices {
         "cabecalho": cabecalho,
         "itens": itens,
         "parcelas": parcelas,
-        "quitar_total": quitarTotal,
+        //"quitar_total": quitarTotal,
       }),
     );
 

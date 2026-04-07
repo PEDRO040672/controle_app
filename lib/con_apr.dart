@@ -289,12 +289,12 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
       dataRowHeight: 42,
       headingRowHeight: 46,
       showCheckboxColumn: false,
-      minWidth: 1000,
+      minWidth: 1200,
       columns: const [
         DataColumn2(label: Text('TR'), numeric: true, fixedWidth: 70),
-        DataColumn2(label: Text('Tipo'), fixedWidth: 120),
-        DataColumn2(label: Text('Situação'), fixedWidth: 130),
-        DataColumn2(label: Text('Data'), fixedWidth: 130),
+        DataColumn2(label: Text('Tipo'), fixedWidth: 160),
+        DataColumn2(label: Text('Situação'), fixedWidth: 160),
+        DataColumn2(label: Text('Data'), fixedWidth: 160),
         DataColumn2(
           label: Text('Titular'),
           fixedWidth: 150,

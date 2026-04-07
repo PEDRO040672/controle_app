@@ -309,7 +309,7 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
             horizontalMargin: 12,
             dataRowHeight: 42,
             headingRowHeight: 46,
-            minWidth: 750,
+            minWidth: 800,
             showCheckboxColumn: false,
             columns: const [
               DataColumn2(label: Text('TR'), fixedWidth: 70, numeric: true),

@@ -18,7 +18,7 @@ class ForAprPage extends BaseFormPage {
   final int? aprTr;
 
   const ForAprPage({super.key, required super.onClose, this.aprTr})
-    : super(titulo: 'Cadastro A Pagar/Receber');
+    : super(titulo: 'A Pagar / A Receber');
 
   @override
   State<ForAprPage> createState() => _ForAprState();
@@ -88,6 +88,9 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     });
   }
 
+  //===============================================================
+  // -------------[ Carregar CADAPR ]------------------------------
+  //===============================================================
   Future<void> _carregarCadapr() async {
     final codigo = int.tryParse(_apr_trController.text) ?? 0;
     if (codigo <= 0) {
@@ -190,10 +193,14 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     parcelasController.add([
       TextEditingController(),
       TextEditingController(),
-      TextEditingController(),
+      //TextEditingController(),
     ]);
 
-    parcelasFocus.add([FocusNode(), FocusNode(), FocusNode()]);
+    parcelasFocus.add([
+      FocusNode(),
+      FocusNode(),
+      //FocusNode()
+    ]);
   }
 
   void recalcular() {
@@ -244,7 +251,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                   return KeyEventResult.handled;
                 }
               }
-
               if (event.logicalKey == LogicalKeyboardKey.escape) {
                 onEscapePressed();
                 return KeyEventResult.handled;
@@ -264,7 +270,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                 const SizedBox(height: 12),
                 _buildTotais(),
                 const SizedBox(height: 12),
-                //_buildBotoes(),
                 BotoesFormulario(
                   //habilitado: podeGravar,
                   habilitado: _habilitado,
@@ -298,29 +303,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     );
   }
 
-  Widget _cell(
-    TextEditingController c,
-    FocusNode f,
-    double w, {
-    bool readOnly = false,
-    Function(String)? onChanged,
-  }) {
-    return SizedBox(
-      width: w,
-      child: TextField(
-        controller: c,
-        focusNode: f,
-        readOnly: readOnly || _situ_blq,
-        onChanged: onChanged,
-        decoration: const InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-          border: OutlineInputBorder(),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCabecalho() {
     return Column(
       children: [
@@ -351,6 +333,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
               focusNode: _apr_tipoFocus,
               nextFocus: _apr_dataFocus,
               enabled: !_habilitado && !_situ_blq,
+              onSubmitted: _valid_apr_tipo,
             ),
           ],
         ),
@@ -452,6 +435,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
               //onSubmitted: _valid_os_htkm,
               nextFocus: _apr_obsFocus,
               enabled: !_habilitado && !_situ_blq,
+              onSubmitted: _valid_apr_htkm,
             ),
             SizedBox(width: 10),
             Expanded(
@@ -651,6 +635,10 @@ class _ForAprState extends BaseFormState<ForAprPage> {
   // GRAVAR
   // ============================================================
   Future<void> _gravar() async {
+    if (!await _valid_apr_tipo()) return;
+    if (!await _valid_apr_data()) return;
+    if (!await _valid_apr_htkm()) return;
+
     if (!podeGravar) {
       await MSG(
         context,
@@ -660,6 +648,8 @@ class _ForAprState extends BaseFormState<ForAprPage> {
       );
       return;
     }
+
+    //--------[ Se PASSOU nas Validações, CONTINUA ]------------
     List<Map<String, dynamic>> listaItens = [];
     List<Map<String, dynamic>> listaParcelas = [];
     for (int i = 0; i < itensController.length; i++) {
@@ -1017,6 +1007,21 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     });
   }
 
+  //========================[ _valid_apr_tipo ]===========
+  Future<bool> _valid_apr_tipo() async {
+    if (_apr_tipoController.text == "OS") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tipo OS, somente para CONSULTAS.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _apr_tipoFocus.requestFocus(); // volta foco no campo
+      return false;
+    }
+    return true;
+  }
+
   //========================[ _valid_apr_data ]===========
   Future<bool> _valid_apr_data() async {
     if (!Campo.validaData(_apr_dataController.text)) {
@@ -1027,6 +1032,22 @@ class _ForAprState extends BaseFormState<ForAprPage> {
         ),
       );
       _apr_dataFocus.requestFocus(); // volta foco no campo
+      return false;
+    }
+    return true;
+  }
+
+  //========================[ _valid_os_HTKM ]===========
+  Future<bool> _valid_apr_htkm() async {
+    final valor = Campo.textDouble(_apr_htkmController.text);
+    if (valor <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('O campo HT/KM deve ser informado.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _apr_htkmFocus.requestFocus(); // volta foco no campo
       return false;
     }
     return true;

@@ -257,7 +257,10 @@ class _MenuPageState extends State<MenuPage> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.assignment_outlined, color: Colors.white),
+            leading: const Icon(
+              Icons.request_quote_outlined,
+              color: Colors.white,
+            ),
             title: const Text(
               'A Pagar/Receber',
               style: TextStyle(color: Colors.white),
