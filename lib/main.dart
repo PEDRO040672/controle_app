@@ -267,7 +267,7 @@ class _MenuPageState extends State<MenuPage> {
                 _Modulo(
                   id: 'forapr',
                   titulo: 'A Pagar/Receber',
-                  widget: ForApr(onClose: () => _fecharModulo('forapr')),
+                  widget: ForAprPage(onClose: () => _fecharModulo('forapr')),
                 ),
               );
             },

@@ -497,6 +497,7 @@ TOTAL: R\$ ${_os_vltotsController.text}
       return;
     }
     _iniciarCarregamento();
+
     try {
       final cados = await _osServices.getById(codigo);
       if (!mounted) return;
@@ -619,7 +620,6 @@ TOTAL: R\$ ${_os_vltotsController.text}
   // ============================================================
   // EXCLUIR
   // ============================================================
-
   Future<void> _excluir() async {
     final codigo = int.tryParse(_os_trController.text) ?? 0;
     if (codigo <= 0) return;

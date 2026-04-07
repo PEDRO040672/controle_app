@@ -1,106 +1,175 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'base_form.dart';
+import '../widgets/msg.dart';
 import '../widgets/campo.dart';
 import '../widgets/botoes.dart';
 import '../models/cadapr_models.dart';
-//import '../models/cadipr_models.dart';
-//import '../models/cadppr_models.dart';
+import 'services/cadtit_services.dart';
+import 'services/cadeqp_services.dart';
+import 'services/cadhis_services.dart';
 import '../services/cadapr_services.dart';
+import 'con_apr.dart';
+import 'con_tit.dart';
+import 'con_eqp.dart';
+import 'con_his.dart';
 
-class ForApr extends BaseFormPage {
+class ForAprPage extends BaseFormPage {
   final int? aprTr;
 
-  const ForApr({super.key, required super.onClose, this.aprTr})
-    : super(titulo: 'Cadastro APR');
+  const ForAprPage({super.key, required super.onClose, this.aprTr})
+    : super(titulo: 'Cadastro A Pagar/Receber');
 
   @override
-  State<ForApr> createState() => _ForAprState();
+  State<ForAprPage> createState() => _ForAprState();
 }
 
-class _ForAprState extends BaseFormState<ForApr> {
-  final service = CadaprServices();
-
-  bool inclusao = true;
+class _ForAprState extends BaseFormState<ForAprPage> {
+  final CadaprServices _aprServices = CadaprServices();
+  final CadtitServices _titServices = CadtitServices();
+  final CadeqpServices _eqpServices = CadeqpServices();
+  final CadhisServices _hisServices = CadhisServices();
 
   // ================= CABEÇALHO =================
-  final cTr = TextEditingController();
-  final cTipo = TextEditingController();
-  final cSitu = TextEditingController();
-  final cData = TextEditingController();
-  final cTit = TextEditingController();
-  final cTitNome = TextEditingController();
-  final cEqp = TextEditingController();
-  final cEqpDesc = TextEditingController();
-  final cHtKm = TextEditingController();
-  final cObs = TextEditingController();
-  final cTotal = TextEditingController();
+  final _apr_trController = TextEditingController();
+  final _apr_tipoController = TextEditingController();
+  final _apr_situController = TextEditingController();
+  final _apr_dataController = TextEditingController();
+  final _apr_titController = TextEditingController();
+  final _tit_nomeController = TextEditingController();
+  final _apr_eqpController = TextEditingController();
+  final _eqp_descController = TextEditingController();
+  final _apr_htkmController = TextEditingController();
+  final _apr_obsController = TextEditingController();
+  final _apr_vltotController = TextEditingController();
+
+  final _apr_trFocus = FocusNode();
+  final _apr_tipoFocus = FocusNode();
+  final _apr_situFocus = FocusNode();
+  final _apr_dataFocus = FocusNode();
+  final _apr_titFocus = FocusNode();
+  final _tit_nomeFocus = FocusNode();
+  final _apr_eqpFocus = FocusNode();
+  final _eqp_descFocus = FocusNode();
+  final _apr_htkmFocus = FocusNode();
+  final _apr_obsFocus = FocusNode();
+  final _apr_vltotFocus = FocusNode();
+
+  final _gravarFocus = FocusNode();
+  bool _inclusao = true;
+  bool _habilitado = true;
+  bool _situ_blq = false;
+  bool _carregando = false;
 
   // ================= GRID =================
-  final List<List<TextEditingController>> itens = [];
+  final List<List<TextEditingController>> itensController = [];
   final List<List<FocusNode>> itensFocus = [];
 
-  final List<List<TextEditingController>> parcelas = [];
+  final List<List<TextEditingController>> parcelasController = [];
   final List<List<FocusNode>> parcelasFocus = [];
 
   double totalItens = 0;
   double totalParcelas = 0;
-
-  bool get isOS => cTipo.text == "OS";
 
   @override
   void initState() {
     super.initState();
 
     if (widget.aprTr != null) {
-      inclusao = false;
-      carregar(widget.aprTr!);
+      _inclusao = false;
+      _carregarCadapr();
     } else {
       _addItem();
       _addParcela();
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _apr_trFocus.requestFocus();
+    });
   }
 
-  Future<void> carregar(int id) async {
-    final data = await service.getById(id);
-    if (data == null) return;
-
-    final cad = Cadapr.fromJson({
-      ...data['cabecalho'],
-      "itens": data['itens'],
-      "parcelas": data['parcelas'],
-    });
-
-    cTr.text = cad.apr_tr.toString();
-    cTipo.text = cad.apr_tipo;
-    cSitu.text = cad.apr_situ;
-    cData.text = Campo.dataFromPg(cad.apr_data.toString());
-    cTit.text = cad.apr_tit.toString();
-    cTitNome.text = cad.tit_nome ?? '';
-    cEqp.text = cad.apr_eqp.toString();
-    cEqpDesc.text = cad.eqp_desc ?? '';
-    cHtKm.text = cad.apr_htkm.toString();
-    cObs.text = cad.apr_obs;
-
-    for (var i in cad.itens) {
-      _addItem();
-      itens.last[0].text = i.ipr_his.toString();
-      itens.last[1].text = i.his_desc ?? '';
-      itens.last[2].text = i.ipr_qtd.toString();
-      itens.last[3].text = i.ipr_vlunit.toString();
+  Future<void> _carregarCadapr() async {
+    final codigo = int.tryParse(_apr_trController.text) ?? 0;
+    if (codigo <= 0) {
+      setState(() {
+        _inclusao = true;
+        _habilitado = false;
+        _situ_blq = false;
+        _limparCampos();
+        _apr_situController.text = "Ñ Quitado";
+        _apr_dataController.text = Campo.dataFromPg(
+          DateTime.now().toIso8601String().split('T')[0],
+        );
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _apr_tipoFocus.requestFocus();
+      });
+      return;
     }
+    _iniciarCarregamento();
 
-    for (var p in cad.parcelas) {
-      _addParcela();
-      parcelas.last[0].text = p.ppr_pc.toString();
-      parcelas.last[1].text = Campo.dataFromPg(p.ppr_dtv.toString());
-      parcelas.last[2].text = p.ppr_vlpc.toString();
+    try {
+      final cadapr = await _aprServices.getById(codigo);
+      if (!mounted) return;
+      if (cadapr != null) {
+        setState(() {
+          _inclusao = false;
+          _habilitado = false;
+          final cad = Cadapr.fromJson({
+            ...cadapr['cabecalho'],
+            "itens": cadapr['itens'],
+            "parcelas": cadapr['parcelas'],
+          });
+          _apr_trController.text = cad.apr_tr.toString();
+          _apr_tipoController.text = cad.apr_tipo;
+          _apr_situController.text = cad.apr_situ;
+          if ((_apr_situController.text != "Ñ Quitado") ||
+              (_apr_tipoController.text == "OS")) {
+            _situ_blq = true;
+          }
+          _apr_dataController.text = Campo.dataFromPg(
+            cad.apr_data.toIso8601String().split('T')[0],
+          );
+          _apr_titController.text = cad.apr_tit.toString();
+          _tit_nomeController.text = cad.tit_nome ?? '';
+          _apr_eqpController.text = cad.apr_eqp.toString();
+          _eqp_descController.text = cad.eqp_desc ?? '';
+          _apr_htkmController.text = cad.apr_htkm.toString();
+          _apr_obsController.text = cad.apr_obs;
+
+          _limparLinhas(); // limpar Linhas dos itens e parcelas
+
+          for (var i in cad.itens) {
+            _addItem();
+            itensController.last[0].text = i.ipr_his.toString();
+            itensController.last[1].text = i.his_desc ?? '';
+            itensController.last[2].text = i.ipr_qtd.toString();
+            itensController.last[3].text = i.ipr_vlunit.toString();
+          }
+
+          for (var p in cad.parcelas) {
+            _addParcela();
+            parcelasController.last[0].text = Campo.dataFromPg(
+              p.ppr_dtv.toIso8601String().split('T')[0],
+            );
+            parcelasController.last[1].text = p.ppr_vlpc.toString();
+          }
+          recalcular();
+        });
+      } else {
+        await MSG(context, 'Aviso', 'Registro não encontrado.', 1);
+        _cancelar();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      await MSG(context, 'Erro', '$e', 1);
+    } finally {
+      _finalizarCarregamento();
     }
-
-    recalcular();
   }
 
   void _addItem() {
-    itens.add([
+    itensController.add([
       TextEditingController(),
       TextEditingController(),
       TextEditingController(),
@@ -118,7 +187,7 @@ class _ForAprState extends BaseFormState<ForApr> {
   }
 
   void _addParcela() {
-    parcelas.add([
+    parcelasController.add([
       TextEditingController(),
       TextEditingController(),
       TextEditingController(),
@@ -131,7 +200,7 @@ class _ForAprState extends BaseFormState<ForApr> {
     totalItens = 0;
     totalParcelas = 0;
 
-    for (var r in itens) {
+    for (var r in itensController) {
       double qtd = double.tryParse(r[2].text.replaceAll(',', '.')) ?? 0;
       double vl = double.tryParse(r[3].text.replaceAll(',', '.')) ?? 0;
       double tot = qtd * vl;
@@ -139,38 +208,92 @@ class _ForAprState extends BaseFormState<ForApr> {
       totalItens += tot;
     }
 
-    for (var r in parcelas) {
-      totalParcelas += double.tryParse(r[2].text.replaceAll(',', '.')) ?? 0;
+    for (var r in parcelasController) {
+      totalParcelas += double.tryParse(r[1].text.replaceAll(',', '.')) ?? 0;
     }
 
-    cTotal.text = totalItens.toStringAsFixed(2);
-
-    if (totalParcelas == 0) {
-      cSitu.text = "Ñ Quitado";
-    } else if (totalParcelas < totalItens) {
-      cSitu.text = "Parcial";
-    } else {
-      cSitu.text = "Quitado";
-    }
+    _apr_vltotController.text = totalItens.toStringAsFixed(2);
 
     setState(() {});
   }
 
-  bool get podeGravar => totalItens == totalParcelas;
+  bool get podeGravar =>
+      ((totalItens > 0) &&
+      (totalParcelas > 0) &&
+      ((totalItens - totalParcelas) == 0));
 
   @override
   Widget buildBody(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        _buildCabecalho(),
-        const SizedBox(height: 12),
-        _buildGridItens(),
-        const SizedBox(height: 12),
-        _buildGridParcelas(),
-        const SizedBox(height: 12),
-        _buildTotais(),
-        const SizedBox(height: 12),
-        _buildBotoes(),
+        Focus(
+          autofocus: true,
+          onKeyEvent: (node, event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.f2) {
+                if (_habilitado && _apr_trFocus.hasFocus) {
+                  _abrirConsulta();
+                  return KeyEventResult.handled;
+                }
+                if (!_habilitado && _apr_titFocus.hasFocus) {
+                  _abrirConsultaCadtit();
+                  return KeyEventResult.handled;
+                }
+                if (!_habilitado && _apr_eqpFocus.hasFocus) {
+                  _abrirConsultaCadeqp();
+                  return KeyEventResult.handled;
+                }
+              }
+
+              if (event.logicalKey == LogicalKeyboardKey.escape) {
+                onEscapePressed();
+                return KeyEventResult.handled;
+              }
+            }
+            return KeyEventResult.ignored;
+          },
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Column(
+              children: [
+                _buildCabecalho(),
+                const SizedBox(height: 12),
+                _buildGridItens(),
+                const SizedBox(height: 12),
+                _buildGridParcelas(),
+                const SizedBox(height: 12),
+                _buildTotais(),
+                const SizedBox(height: 12),
+                //_buildBotoes(),
+                BotoesFormulario(
+                  //habilitado: podeGravar,
+                  habilitado: _habilitado,
+                  inclusao: _inclusao,
+                  bloqueado: _situ_blq,
+                  onGravar: _gravar,
+                  onExcluir: _excluir,
+                  onCancelar: _cancelar,
+                  focusGravar: _gravarFocus,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // OVERLAY DE LOADING
+        if (_carregando)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.2),
+              child: const Center(
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -187,7 +310,7 @@ class _ForAprState extends BaseFormState<ForApr> {
       child: TextField(
         controller: c,
         focusNode: f,
-        readOnly: readOnly || isOS,
+        readOnly: readOnly || _situ_blq,
         onChanged: onChanged,
         decoration: const InputDecoration(
           isDense: true,
@@ -203,117 +326,146 @@ class _ForAprState extends BaseFormState<ForApr> {
       children: [
         Row(
           children: [
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.inteiro,
-                titulo: 'TR',
-                controller: cTr,
-                focusNode: FocusNode(),
-                enabled: false,
-              ),
+            Campo(
+              tipo: TipoCampo.inteiro,
+              titulo: 'TR [2c/F2]',
+              controller: _apr_trController,
+              focusNode: _apr_trFocus,
+              nextFocus: _apr_tipoFocus,
+              tamanho: 6,
+              enabled: _habilitado,
+              onDoubleTap: () {
+                _abrirConsulta();
+              },
+              onSubmitted: () async {
+                await _carregarCadapr();
+                return true;
+              },
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.lista,
-                titulo: 'Tipo',
-                controller: cTipo,
-                focusNode: FocusNode(),
-                nextFocus: FocusNode(),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.texto,
-                titulo: 'Situação',
-                controller: cSitu,
-                focusNode: FocusNode(),
-                enabled: false,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.data,
-                titulo: 'Data',
-                controller: cData,
-                focusNode: FocusNode(),
-                nextFocus: FocusNode(),
-              ),
+            const Spacer(),
+            Campo(
+              tipo: TipoCampo.lista,
+              titulo: 'Tipo',
+              controller: _apr_tipoController,
+              lista: 'OS,A_Pagar,A_Receber',
+              focusNode: _apr_tipoFocus,
+              nextFocus: _apr_dataFocus,
+              enabled: !_habilitado && !_situ_blq,
             ),
           ],
         ),
 
-        const SizedBox(height: 8),
-
+        const SizedBox(height: 10),
         Row(
           children: [
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.inteiro,
-                titulo: 'Tit',
-                controller: cTit,
-                focusNode: FocusNode(),
-                nextFocus: FocusNode(),
-              ),
+            Campo(
+              tipo: TipoCampo.lista,
+              titulo: 'Situação',
+              controller: _apr_situController,
+              lista: 'Ñ Quitado,Quitado,Parcial',
+              focusNode: _apr_situFocus,
+              //nextFocus: _apr_dataFocus,
+              enabled: false,
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.texto,
-                titulo: 'Nome',
-                controller: cTitNome,
-                focusNode: FocusNode(),
-                enabled: false,
-              ),
+            const Spacer(),
+            Campo(
+              tipo: TipoCampo.data,
+              titulo: 'Data',
+              controller: _apr_dataController,
+              focusNode: _apr_dataFocus,
+              nextFocus: _apr_titFocus,
+              enabled: !_habilitado && !_situ_blq,
+              onSubmitted: _valid_apr_data,
             ),
           ],
         ),
 
-        const SizedBox(height: 8),
-
+        const SizedBox(height: 10),
         Row(
           children: [
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.inteiro,
-                titulo: 'Equip',
-                controller: cEqp,
-                focusNode: FocusNode(),
-                nextFocus: FocusNode(),
-              ),
+            Campo(
+              tipo: TipoCampo.inteiro,
+              titulo: 'Titular',
+              controller: _apr_titController,
+              focusNode: _apr_titFocus,
+              nextFocus: _apr_eqpFocus,
+              tamanho: 5,
+              enabled: !_habilitado && !_situ_blq,
+              onDoubleTap: () {
+                _abrirConsultaCadtit();
+              },
+              onSubmitted: _carregarCadtit,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 5),
             Expanded(
               child: Campo(
                 tipo: TipoCampo.texto,
-                titulo: 'Descrição',
-                controller: cEqpDesc,
-                focusNode: FocusNode(),
+                titulo: '',
+                controller: _tit_nomeController,
+                focusNode: _tit_nomeFocus,
+                tamanho: 50,
                 enabled: false,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Campo(
-                tipo: TipoCampo.double,
-                titulo: 'HT/KM',
-                controller: cHtKm,
-                focusNode: FocusNode(),
-                nextFocus: FocusNode(),
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Campo(
+              tipo: TipoCampo.inteiro,
+              titulo: 'Eqpto',
+              controller: _apr_eqpController,
+              focusNode: _apr_eqpFocus,
+              nextFocus: _apr_htkmFocus,
+              tamanho: 5,
+              enabled: !_habilitado && !_situ_blq,
+              onDoubleTap: () {
+                _abrirConsultaCadeqp();
+              },
+              onSubmitted: _carregarCadeqp,
+            ),
+            SizedBox(width: 5),
+            Expanded(
+              child: Campo(
+                tipo: TipoCampo.texto,
+                titulo: '',
+                controller: _eqp_descController,
+                focusNode: _eqp_descFocus,
+                tamanho: 50,
+                enabled: false,
+              ),
+            ),
+          ],
+        ),
 
-        Campo(
-          tipo: TipoCampo.texto,
-          titulo: 'Observação',
-          controller: cObs,
-          focusNode: FocusNode(),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Campo(
+              tipo: TipoCampo.double,
+              titulo: 'HT/KM',
+              controller: _apr_htkmController,
+              focusNode: _apr_htkmFocus,
+              mascara: '999.999,9',
+              //onSubmitted: _valid_os_htkm,
+              nextFocus: _apr_obsFocus,
+              enabled: !_habilitado && !_situ_blq,
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: Campo(
+                tipo: TipoCampo.texto,
+                titulo: 'Observação',
+                controller: _apr_obsController,
+                focusNode: _apr_obsFocus,
+                nextFocus: itensFocus.isNotEmpty ? itensFocus[0][0] : null,
+                tamanho: 50,
+                enabled: !_habilitado && !_situ_blq,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -325,36 +477,86 @@ class _ForAprState extends BaseFormState<ForApr> {
       children: [
         const Text("Itens", style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
-        ...List.generate(itens.length, (i) {
-          return Row(
+
+        ...List.generate(itensController.length, (i) {
+          return Wrap(
+            spacing: 5,
+            runSpacing: 5,
             children: [
-              _cell(itens[i][0], itensFocus[i][0], 60),
-              const SizedBox(width: 4),
-              _cell(itens[i][1], itensFocus[i][1], 220),
-              const SizedBox(width: 4),
-              _cell(
-                itens[i][2],
-                itensFocus[i][2],
-                80,
-                onChanged: (_) => recalcular(),
+              Campo(
+                tipo: TipoCampo.inteiro,
+                titulo: i == 0 ? 'Histórico' : '',
+                controller: itensController[i][0],
+                focusNode: itensFocus[i][0],
+                nextFocus: itensFocus[i][1],
+                tamanho: 4,
+                enabled: !_habilitado && !_situ_blq,
+                onDoubleTap: () {
+                  _abrirConsultaCadhis(i);
+                },
+                onSubmitted: () => _carregarCadhis(i),
               ),
-              const SizedBox(width: 4),
-              _cell(
-                itens[i][3],
-                itensFocus[i][3],
-                100,
-                onChanged: (_) => recalcular(),
+
+              Campo(
+                tipo: TipoCampo.texto,
+                titulo: i == 0 ? 'Descrição' : '',
+                controller: itensController[i][1],
+                focusNode: itensFocus[i][1],
+                tamanho: 15,
+                enabled: false,
               ),
-              const SizedBox(width: 4),
-              _cell(itens[i][4], itensFocus[i][4], 100, readOnly: true),
+
+              Campo(
+                tipo: TipoCampo.double,
+                titulo: i == 0 ? 'Qtda' : '',
+                controller: itensController[i][2],
+                focusNode: itensFocus[i][2],
+                nextFocus: itensFocus[i][3],
+                mascara: '999,9',
+                onChanged: (_) => recalcular(),
+                enabled: !_habilitado && !_situ_blq,
+              ),
+
+              Campo(
+                tipo: TipoCampo.double,
+                titulo: i == 0 ? 'Vl. Unitário' : '',
+                controller: itensController[i][3],
+                focusNode: itensFocus[i][3],
+                nextFocus: parcelasFocus[0][0],
+                mascara: '9.999,99',
+                onChanged: (_) => recalcular(),
+                enabled: !_habilitado && !_situ_blq,
+              ),
+
+              Campo(
+                tipo: TipoCampo.double,
+                titulo: i == 0 ? 'V. Tot. Item' : '',
+                controller: itensController[i][4],
+                focusNode: itensFocus[i][4],
+                mascara: '99.999,99',
+                enabled: false,
+              ),
+              if (!_situ_blq)
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.delete, size: 18),
+                  onPressed: (!_habilitado && !_situ_blq)
+                      ? () => _removerItem(i)
+                      : null,
+                ),
             ],
           );
         }),
+
         const SizedBox(height: 6),
+
         ElevatedButton(
-          onPressed: () {
-            setState(() => _addItem());
-          },
+          onPressed: (!_habilitado && !_situ_blq)
+              ? () {
+                  setState(() => _addItem());
+                }
+              : null,
           child: const Text("Adicionar Item"),
         ),
       ],
@@ -367,27 +569,53 @@ class _ForAprState extends BaseFormState<ForApr> {
       children: [
         const Text("Parcelas", style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
-        ...List.generate(parcelas.length, (i) {
-          return Row(
+
+        ...List.generate(parcelasController.length, (i) {
+          return Wrap(
+            spacing: 5,
+            runSpacing: 5,
             children: [
-              _cell(parcelas[i][0], parcelasFocus[i][0], 60),
-              const SizedBox(width: 4),
-              _cell(parcelas[i][1], parcelasFocus[i][1], 120),
-              const SizedBox(width: 4),
-              _cell(
-                parcelas[i][2],
-                parcelasFocus[i][2],
-                120,
-                onChanged: (_) => recalcular(),
+              // Data vencimento
+              Campo(
+                tipo: TipoCampo.data,
+                titulo: i == 0 ? 'Data Venc.' : '',
+                controller: parcelasController[i][0],
+                focusNode: parcelasFocus[i][0],
+                nextFocus: parcelasFocus[i][1],
+                enabled: !_habilitado && !_situ_blq,
+                onSubmitted: () => _valid_ppr_data(i),
               ),
+
+              // Valor parcela
+              Campo(
+                tipo: TipoCampo.double,
+                titulo: i == 0 ? 'Valor Parcela' : '',
+                controller: parcelasController[i][1],
+                focusNode: parcelasFocus[i][1],
+                mascara: '99.999,99',
+                onChanged: (_) => recalcular(),
+                nextFocus: _gravarFocus,
+                enabled: !_habilitado && !_situ_blq,
+              ),
+              if (!_situ_blq)
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.delete, size: 18),
+                  onPressed: (!_habilitado && !_situ_blq)
+                      ? () => _removerParcela(i)
+                      : null,
+                ),
             ],
           );
         }),
         const SizedBox(height: 6),
         ElevatedButton(
-          onPressed: () {
-            setState(() => _addParcela());
-          },
+          onPressed: (!_habilitado && !_situ_blq)
+              ? () {
+                  setState(() => _addParcela());
+                }
+              : null,
           child: const Text("Adicionar Parcela"),
         ),
       ],
@@ -396,35 +624,46 @@ class _ForAprState extends BaseFormState<ForApr> {
 
   Widget _buildTotais() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text("Total Itens: ${totalItens.toStringAsFixed(2)}"),
-        Text("Total Parcelas: ${totalParcelas.toStringAsFixed(2)}"),
-        Text("Diferença: ${(totalItens - totalParcelas).toStringAsFixed(2)}"),
+        Expanded(
+          child: Text(
+            "Total Itens: ${totalItens.toStringAsFixed(2)}",
+            textAlign: TextAlign.left,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            "Total Parcelas: ${totalParcelas.toStringAsFixed(2)}",
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            "Diferença: ${(totalItens - totalParcelas).toStringAsFixed(2)}",
+            textAlign: TextAlign.right,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildBotoes() {
-    return BotoesFormulario(
-      inclusao: inclusao,
-      bloqueado: isOS,
-      habilitado: podeGravar,
-      onGravar: _gravar,
-      onExcluir: _excluir,
-      onCancelar: widget.onClose,
-    );
-  }
-
+  // ============================================================
+  // GRAVAR
+  // ============================================================
   Future<void> _gravar() async {
-    if (!podeGravar) return;
-
+    if (!podeGravar) {
+      await MSG(
+        context,
+        'Aviso',
+        'Não pode gravar, pois ha fiferenças nos valores.',
+        1,
+      );
+      return;
+    }
     List<Map<String, dynamic>> listaItens = [];
     List<Map<String, dynamic>> listaParcelas = [];
-
-    for (int i = 0; i < itens.length; i++) {
-      var r = itens[i];
-
+    for (int i = 0; i < itensController.length; i++) {
+      var r = itensController[i];
       listaItens.add({
         "ipr_his": int.tryParse(r[0].text) ?? 0,
         "ipr_qtd": double.tryParse(r[2].text.replaceAll(',', '.')) ?? 0,
@@ -432,52 +671,453 @@ class _ForAprState extends BaseFormState<ForApr> {
         "ipr_vltoti": double.tryParse(r[4].text.replaceAll(',', '.')) ?? 0,
       });
     }
-
-    for (int i = 0; i < parcelas.length; i++) {
-      var r = parcelas[i];
-
+    for (int i = 0; i < parcelasController.length; i++) {
+      var r = parcelasController[i];
       listaParcelas.add({
-        "ppr_dtv": Campo.dataToPg(r[1].text),
-        "ppr_vlpc": double.tryParse(r[2].text.replaceAll(',', '.')) ?? 0,
+        "ppr_dtv": Campo.dataToPg(r[0].text),
+        "ppr_vlpc": double.tryParse(r[1].text.replaceAll(',', '.')) ?? 0,
       });
     }
-
     final cabecalho = {
-      "apr_tipo": cTipo.text,
-      "apr_situ": cSitu.text,
-      "apr_data": Campo.dataToPg(cData.text),
-      "apr_tit": int.tryParse(cTit.text) ?? 0,
-      "apr_eqp": int.tryParse(cEqp.text) ?? 0,
-      "apr_htkm": double.tryParse(cHtKm.text.replaceAll(',', '.')) ?? 0,
-      "apr_obs": cObs.text,
+      "apr_tipo": _apr_tipoController.text,
+      "apr_situ": _apr_situController.text,
+      "apr_data": Campo.dataToPg(_apr_dataController.text),
+      "apr_tit": int.tryParse(_apr_titController.text) ?? 0,
+      "apr_eqp": int.tryParse(_apr_eqpController.text) ?? 0,
+      "apr_htkm":
+          double.tryParse(_apr_htkmController.text.replaceAll(',', '.')) ?? 0,
+      "apr_obs": _apr_obsController.text,
       "apr_vltot": totalItens,
     };
-
-    bool quitarTotal = cSitu.text == "Quitado";
-
-    if (inclusao) {
-      await service.add(
-        cabecalho: cabecalho,
-        itens: listaItens,
-        parcelas: listaParcelas,
-        quitarTotal: quitarTotal,
-      );
-    } else {
-      await service.update(
-        apr_tr: int.parse(cTr.text),
-        cabecalho: cabecalho,
-        itens: listaItens,
-        parcelas: listaParcelas,
-        quitarTotal: quitarTotal,
-      );
+    bool quitarTotal = _apr_situController.text == "Quitado";
+    _iniciarCarregamento();
+    try {
+      if (_inclusao) {
+        await _aprServices.add(
+          cabecalho: cabecalho,
+          itens: listaItens,
+          parcelas: listaParcelas,
+          quitarTotal: quitarTotal,
+        );
+      } else {
+        await _aprServices.update(
+          apr_tr: int.parse(_apr_trController.text),
+          cabecalho: cabecalho,
+          itens: listaItens,
+          parcelas: listaParcelas,
+          quitarTotal: quitarTotal,
+        );
+      }
+      if (!mounted) return;
+      await MSG(context, 'Aviso', 'Registro gravado com sucesso.', 1);
+      //_cancelar();
+    } catch (e) {
+      if (!mounted) return;
+      await MSG(context, 'Erro', 'Registro NÃO gravado: $e', 1);
+    } finally {
+      _cancelar();
+      _finalizarCarregamento();
     }
-
-    widget.onClose();
   }
 
+  // ============================================================
+  // EXCLUIR
+  // ============================================================
   Future<void> _excluir() async {
-    if (cTr.text.isEmpty) return;
-    await service.delete(int.parse(cTr.text));
-    widget.onClose();
+    final codigo = int.tryParse(_apr_trController.text) ?? 0;
+    if (codigo <= 0) return;
+    _iniciarCarregamento();
+    try {
+      await _aprServices.delete(codigo);
+      if (!mounted) return;
+      await MSG(context, 'Aviso', 'Registro excluído com sucesso.', 1);
+    } catch (e) {
+      if (!mounted) return;
+      await MSG(context, 'Erro', 'Erro ao excluir: $e', 1);
+    } finally {
+      _cancelar();
+      _finalizarCarregamento();
+    }
+  }
+
+  // ============================================================
+  // CONSULTA
+  // ============================================================
+  Future<void> _abrirConsulta() async {
+    FocusScope.of(context).unfocus();
+    final int? idSelecionado = await ConsultaCadapr.abrir(context);
+    if (idSelecionado != null) {
+      _apr_trController.text = idSelecionado.toString();
+      await _carregarCadapr();
+    }
+  }
+
+  // ============================================================
+  // CONSULTA  CADTIT
+  // ============================================================
+  Future<void> _abrirConsultaCadtit() async {
+    FocusScope.of(context).unfocus();
+    final int? idSelecionado = await ConsultaCadtit.abrir(context);
+    if (idSelecionado != null) {
+      _apr_titController.text = idSelecionado.toString();
+      await _carregarCadtit();
+    }
+  }
+
+  // ============================================================
+  // CONSULTA  CADEQP
+  // ============================================================
+  Future<void> _abrirConsultaCadeqp() async {
+    FocusScope.of(context).unfocus();
+    final int? idSelecionado = await ConsultaCadeqp.abrir(context);
+    if (idSelecionado != null) {
+      _apr_eqpController.text = idSelecionado.toString();
+      await _carregarCadeqp();
+    }
+  }
+
+  // ============================================================
+  // CONSULTA  CADHIS
+  // ============================================================
+  Future<void> _abrirConsultaCadhis(int i) async {
+    FocusScope.of(context).unfocus();
+    final int? idSelecionado = await ConsultaCadhis.abrir(context);
+    if (idSelecionado != null) {
+      itensController[i][0].text = idSelecionado.toString();
+      await _carregarCadhis(i);
+    }
+  }
+
+  // ============================================================
+  // CARREGAR CADTIT
+  // ============================================================
+  Future<bool> _carregarCadtit() async {
+    final codigo = int.tryParse(_apr_titController.text) ?? 0;
+    if (codigo <= 0) {
+      setState(() {
+        _apr_titController.clear();
+        _tit_nomeController.clear();
+        _apr_titFocus.requestFocus();
+      });
+      _abrirConsultaCadtit();
+      return false;
+    }
+    _iniciarCarregamento();
+    try {
+      final cadtit = await _titServices.getById(codigo);
+      if (!mounted) {
+        setState(() {
+          _apr_titController.clear();
+          _tit_nomeController.clear();
+          _apr_titFocus.requestFocus();
+        });
+        return false;
+      }
+      if (cadtit != null) {
+        _tit_nomeController.text = cadtit.tit_nome;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _apr_eqpFocus.requestFocus();
+        });
+      } else {
+        await MSG(context, 'Aviso', 'Titular não encontrado.', 1);
+        setState(() {
+          _apr_titController.clear();
+          _tit_nomeController.clear();
+          _apr_titFocus.requestFocus();
+        });
+        return false;
+      }
+    } catch (e) {
+      if (!mounted) return false;
+      await MSG(context, 'Erro', '$e', 1);
+    } finally {
+      _finalizarCarregamento();
+    }
+    return true;
+  }
+
+  // ============================================================
+  // CARREGAR CADEQP
+  // ============================================================
+  Future<bool> _carregarCadeqp() async {
+    final codigo = int.tryParse(_apr_eqpController.text) ?? 0;
+    if (codigo <= 0) {
+      setState(() {
+        _apr_eqpController.clear();
+        _eqp_descController.clear();
+        _apr_eqpFocus.requestFocus();
+      });
+      _abrirConsultaCadeqp();
+      return false;
+    }
+    _iniciarCarregamento();
+    try {
+      final cadeqp = await _eqpServices.getById(codigo);
+      if (!mounted) {
+        setState(() {
+          _apr_eqpController.clear();
+          _eqp_descController.clear();
+          _apr_eqpFocus.requestFocus();
+        });
+        return false;
+      }
+      if (cadeqp != null) {
+        _eqp_descController.text = cadeqp.eqp_desc;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _apr_htkmFocus.requestFocus();
+        });
+      } else {
+        await MSG(context, 'Aviso', 'Equipamento não encontrado.', 1);
+        setState(() {
+          _apr_eqpController.clear();
+          _eqp_descController.clear();
+          _apr_eqpFocus.requestFocus();
+        });
+        return false;
+      }
+    } catch (e) {
+      if (!mounted) return false;
+      await MSG(context, 'Erro', '$e', 1);
+    } finally {
+      _finalizarCarregamento();
+    }
+    return true;
+  }
+
+  // ============================================================
+  // CARREGAR CADHIS
+  // ============================================================
+  Future<bool> _carregarCadhis(int i) async {
+    final codigo = int.tryParse(itensController[i][0].text) ?? 0;
+    if (codigo <= 0) {
+      setState(() {
+        itensController[i][0].clear();
+        itensController[i][1].clear();
+        itensFocus[i][0].requestFocus();
+      });
+      _abrirConsultaCadhis(i);
+      return false;
+    }
+    _iniciarCarregamento();
+    try {
+      final cadhis = await _hisServices.getById(codigo);
+      if (!mounted) {
+        setState(() {
+          itensController[i][0].clear();
+          itensController[i][1].clear();
+          itensFocus[i][0].requestFocus();
+        });
+        return false;
+      }
+      if (cadhis != null) {
+        itensController[i][1].text = cadhis.his_desc;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) itensFocus[i][2].requestFocus();
+        });
+      } else {
+        await MSG(context, 'Aviso', 'Histórico não encontrado.', 1);
+        setState(() {
+          itensController[i][0].clear();
+          itensController[i][1].clear();
+          itensFocus[i][0].requestFocus();
+        });
+        return false;
+      }
+    } catch (e) {
+      if (!mounted) return false;
+      await MSG(context, 'Erro', '$e', 1);
+    } finally {
+      _finalizarCarregamento();
+    }
+    return true;
+  }
+
+  // ============================================================
+  // LOADING
+  // ============================================================
+  void _iniciarCarregamento() {
+    setState(() => _carregando = true);
+  }
+
+  void _finalizarCarregamento() {
+    if (mounted) {
+      setState(() => _carregando = false);
+    }
+  }
+
+  // ============================================================
+  // LIMPAR
+  // ============================================================
+  void _limparCampos() {
+    _apr_trController.clear();
+    _apr_tipoController.clear();
+    _apr_situController.clear();
+    _apr_dataController.clear();
+    _apr_titController.clear();
+    _tit_nomeController.clear();
+    _apr_eqpController.clear();
+    _eqp_descController.clear();
+    _apr_htkmController.clear();
+    _apr_obsController.clear();
+    _apr_vltotController.clear();
+    _limparLinhas(); // limpar Linhas
+    _addItem(); // recria 1 linha itens
+    _addParcela(); // recria 1 linha parcelas
+  }
+
+  // ============================================================
+  // Limpar Linhas dos Itens e Parcelas
+  // ============================================================
+  void _limparLinhas() {
+    // limpar controllers itens
+    for (var linha in itensController) {
+      for (var c in linha) {
+        c.dispose();
+      }
+    }
+    // limpar focus itens
+    for (var linha in itensFocus) {
+      for (var f in linha) {
+        f.dispose();
+      }
+    }
+    itensController.clear();
+    itensFocus.clear();
+    // limpar controllers parcelas
+    for (var linha in parcelasController) {
+      for (var c in linha) {
+        c.dispose();
+      }
+    }
+    // limpar focus parcelas
+    for (var linha in parcelasFocus) {
+      for (var f in linha) {
+        f.dispose();
+      }
+    }
+    parcelasController.clear();
+    parcelasFocus.clear();
+    totalItens = 0;
+    totalParcelas = 0;
+  }
+
+  // ============================================================
+  // CANCELAR
+  // ============================================================
+  void _cancelar() {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _inclusao = true;
+      _habilitado = true;
+      _situ_blq = false;
+      _limparCampos();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _apr_trFocus.requestFocus();
+    });
+  }
+
+  //========================[ _valid_apr_data ]===========
+  Future<bool> _valid_apr_data() async {
+    if (!Campo.validaData(_apr_dataController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data inválida.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      _apr_dataFocus.requestFocus(); // volta foco no campo
+      return false;
+    }
+    return true;
+  }
+
+  //========================[ _valid_ppr_data ]===========
+  Future<bool> _valid_ppr_data(int i) async {
+    if (!Campo.validaData(parcelasController[i][0].text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data inválida.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      parcelasFocus[i][0].requestFocus(); // volta foco no campo
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  void onEscapePressed() {
+    if (_habilitado) {
+      widget.onClose();
+    } else {
+      _cancelar();
+    }
+  }
+
+  //========================[ Remover Item ]===========
+  void _removerItem(int i) {
+    if (itensController.length == 1) return;
+    for (var c in itensController[i]) {
+      c.dispose();
+    }
+    for (var f in itensFocus[i]) {
+      f.dispose();
+    }
+    itensController.removeAt(i);
+    itensFocus.removeAt(i);
+    recalcular();
+    setState(() {});
+  }
+
+  //========================[ Remover Parcelas ]===========
+  void _removerParcela(int i) {
+    if (parcelasController.length == 1) return;
+    for (var c in parcelasController[i]) {
+      c.dispose();
+    }
+    for (var f in parcelasFocus[i]) {
+      f.dispose();
+    }
+    parcelasController.removeAt(i);
+    parcelasFocus.removeAt(i);
+    recalcular();
+    setState(() {});
+  }
+
+  //========================[ disponse ]===========
+  @override
+  void dispose() {
+    // cabecalho controllers
+    _apr_trController.dispose();
+    _apr_tipoController.dispose();
+    _apr_situController.dispose();
+    _apr_dataController.dispose();
+    _apr_titController.dispose();
+    _tit_nomeController.dispose();
+    _apr_eqpController.dispose();
+    _eqp_descController.dispose();
+    _apr_htkmController.dispose();
+    _apr_obsController.dispose();
+    _apr_vltotController.dispose();
+
+    // cabecalho focus
+    _apr_trFocus.dispose();
+    _apr_tipoFocus.dispose();
+    _apr_situFocus.dispose();
+    _apr_dataFocus.dispose();
+    _apr_titFocus.dispose();
+    _tit_nomeFocus.dispose();
+    _apr_eqpFocus.dispose();
+    _eqp_descFocus.dispose();
+    _apr_htkmFocus.dispose();
+    _apr_obsFocus.dispose();
+    _apr_vltotFocus.dispose();
+
+    _gravarFocus.dispose();
+
+    _limparLinhas();
+    super.dispose();
   }
 }

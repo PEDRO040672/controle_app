@@ -87,7 +87,7 @@ class BotoesFormulario extends StatelessWidget {
               ElevatedButton(
                 style: estiloBotao,
                 focusNode: focusGravar,
-                onPressed: !habilitado ? onGravar : null,
+                onPressed: !habilitado && !bloqueado ? onGravar : null,
                 child: const Text('Gravar'),
               ),
 

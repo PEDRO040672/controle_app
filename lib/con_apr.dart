@@ -31,6 +31,7 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
   final ScrollController _horizontal = ScrollController();
 
   final formato = NumberFormat('#,##0.00', 'pt_BR');
+  final formatohtkm = NumberFormat('#,##0.0', 'pt_BR');
   final formatoData = DateFormat('dd/MM/yyyy');
 
   List<Cadapr> _lista = [];
@@ -290,12 +291,20 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
       showCheckboxColumn: false,
       minWidth: 1000,
       columns: const [
-        DataColumn2(label: Text('TR'), fixedWidth: 70),
-        DataColumn2(label: Text('Tipo'), fixedWidth: 110),
-        DataColumn2(label: Text('Situação'), fixedWidth: 120),
-        DataColumn2(label: Text('Data'), fixedWidth: 120),
-        DataColumn2(label: Text('Titular'), size: ColumnSize.L),
-        DataColumn2(label: Text('Equipamento'), size: ColumnSize.L),
+        DataColumn2(label: Text('TR'), numeric: true, fixedWidth: 70),
+        DataColumn2(label: Text('Tipo'), fixedWidth: 120),
+        DataColumn2(label: Text('Situação'), fixedWidth: 130),
+        DataColumn2(label: Text('Data'), fixedWidth: 130),
+        DataColumn2(
+          label: Text('Titular'),
+          fixedWidth: 150,
+          size: ColumnSize.L,
+        ),
+        DataColumn2(
+          label: Text('Equipamento'),
+          fixedWidth: 150,
+          size: ColumnSize.L,
+        ),
         DataColumn2(label: Text('HT/KM'), numeric: true),
         DataColumn2(label: Text('Valor'), numeric: true),
       ],
@@ -315,9 +324,23 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
             DataCell(Text(p.apr_tipo)),
             DataCell(Text(p.apr_situ)),
             DataCell(Text(formatoData.format(p.apr_data))),
-            DataCell(Text(p.tit_nome ?? '')),
-            DataCell(Text(p.eqp_desc ?? '')),
-            DataCell(Text(formato.format(p.apr_htkm))),
+            DataCell(
+              Text(
+                p.tit_nome ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+            ),
+            DataCell(
+              Text(
+                p.eqp_desc ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+            ),
+            DataCell(Text(formatohtkm.format(p.apr_htkm))),
             DataCell(Text(formato.format(p.apr_vltot))),
           ],
         );
