@@ -57,12 +57,13 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
   @override
   void initState() {
     super.initState();
-
     final hoje = DateTime.now();
     final dataInicial = DateTime(hoje.year, hoje.month, 1);
-
     _dataIniController.text = DateFormat('dd/MM/yyyy').format(dataInicial);
     _dataFimController.text = DateFormat('dd/MM/yyyy').format(hoje);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _titularFocus.requestFocus();
+    });
   }
 
   @override
@@ -297,12 +298,12 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
         DataColumn2(label: Text('Data'), fixedWidth: 160),
         DataColumn2(
           label: Text('Titular'),
-          fixedWidth: 150,
+          fixedWidth: 200,
           size: ColumnSize.L,
         ),
         DataColumn2(
           label: Text('Equipamento'),
-          fixedWidth: 150,
+          fixedWidth: 180,
           size: ColumnSize.L,
         ),
         DataColumn2(label: Text('HT/KM'), numeric: true),

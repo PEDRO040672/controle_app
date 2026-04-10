@@ -552,12 +552,12 @@ TOTAL: R\$ ${_os_vltotsController.text}
         });
       } else {
         await MSG(context, 'Aviso', 'Registro não encontrado.', 1);
+        _cancelar();
       }
     } catch (e) {
       if (!mounted) return;
       await MSG(context, 'Erro', '$e', 1);
     } finally {
-      _cancelar();
       _finalizarCarregamento();
     }
   }
@@ -579,7 +579,6 @@ TOTAL: R\$ ${_os_vltotsController.text}
       os_tr: codigo,
       os_situ: _os_situController.text,
       os_data: DateTime.parse(Campo.dataToPg(_os_dataController.text)),
-      //os_data: Campo.dataToPg(_os_dataController.text),
       os_hora: _os_horaController.text,
       os_his: int.parse(_os_hisController.text),
       his_desc: _his_descController.text,
@@ -1162,12 +1161,11 @@ TOTAL: R\$ ${_os_vltotsController.text}
 
                 const SizedBox(height: 10),
                 BotoesFormulario(
-                  habilitado: _habilitado,
-                  inclusao: _inclusao,
-                  bloqueado: _situ_blq,
-                  onGravar: _gravar,
-                  onExcluir: _excluir,
-                  onCancelar: _cancelar,
+                  onGravar: (!_habilitado) ? _gravar : null,
+                  onExcluir: (!_habilitado && !_inclusao && !_situ_blq)
+                      ? _excluir
+                      : null,
+                  onCancelar: !_habilitado ? _cancelar : null,
                   focusGravar: _gravarFocus,
                 ),
               ],

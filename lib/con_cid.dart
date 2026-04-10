@@ -35,6 +35,14 @@ class _ConsultaCadcidState extends BaseConsState<ConsultaCadcid> {
   int _selectedIndex = -1;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      filtroFocus.requestFocus();
+    });
+  }
+
+  @override
   void dispose() {
     _filtroController.dispose();
     _vertical.dispose();

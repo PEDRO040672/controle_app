@@ -73,6 +73,9 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
     final dataInicial = DateTime(hoje.year, hoje.month, 1);
     _dataIniController.text = DateFormat('dd/MM/yyyy').format(dataInicial);
     _dataFimController.text = DateFormat('dd/MM/yyyy').format(hoje);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _titularFocus.requestFocus();
+    });
   }
 
   /// CARREGAR

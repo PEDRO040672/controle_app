@@ -5,9 +5,9 @@ import '../widgets/msg.dart';
 import '../widgets/campo.dart';
 import '../widgets/botoes.dart';
 import '../models/cadapr_models.dart';
-import 'services/cadtit_services.dart';
-import 'services/cadeqp_services.dart';
-import 'services/cadhis_services.dart';
+import '../services/cadtit_services.dart';
+import '../services/cadeqp_services.dart';
+import '../services/cadhis_services.dart';
 import '../services/cadapr_services.dart';
 import 'con_apr.dart';
 import 'con_tit.dart';
@@ -71,10 +71,10 @@ class _ForAprState extends BaseFormState<ForAprPage> {
   double totalItens = 0;
   double totalParcelas = 0;
 
+  //===============================================================
   @override
   void initState() {
     super.initState();
-
     if (widget.aprTr != null) {
       _inclusao = false;
       _carregarCadapr();
@@ -82,7 +82,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
       _addItem();
       _addParcela();
     }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _apr_trFocus.requestFocus();
     });
@@ -99,6 +98,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
         _habilitado = false;
         _situ_blq = false;
         _limparCampos();
+        _apr_tipoController.text = "A_Pagar";
         _apr_situController.text = "Ñ Quitado";
         _apr_dataController.text = Campo.dataFromPg(
           DateTime.now().toIso8601String().split('T')[0],
@@ -110,7 +110,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
       return;
     }
     _iniciarCarregamento();
-
     try {
       final cadapr = await _aprServices.getById(codigo);
       if (!mounted) return;
@@ -137,27 +136,36 @@ class _ForAprState extends BaseFormState<ForAprPage> {
           _tit_nomeController.text = cad.tit_nome ?? '';
           _apr_eqpController.text = cad.apr_eqp.toString();
           _eqp_descController.text = cad.eqp_desc ?? '';
-          _apr_htkmController.text = cad.apr_htkm.toString();
+          _apr_htkmController.text = Campo.doubleText(
+            cad.apr_htkm,
+            '999.999,9',
+          );
           _apr_obsController.text = cad.apr_obs;
-
           _limparLinhas(); // limpar Linhas dos itens e parcelas
-
           for (var i in cad.itens) {
             _addItem();
             itensController.last[0].text = i.ipr_his.toString();
             itensController.last[1].text = i.his_desc ?? '';
-            itensController.last[2].text = i.ipr_qtd.toString();
-            itensController.last[3].text = i.ipr_vlunit.toString();
+            itensController.last[2].text = Campo.doubleText(i.ipr_qtd, '999,9');
+            itensController.last[3].text = Campo.doubleText(
+              i.ipr_vlunit,
+              '9.999,99',
+            );
           }
-
           for (var p in cad.parcelas) {
             _addParcela();
             parcelasController.last[0].text = Campo.dataFromPg(
               p.ppr_dtv.toIso8601String().split('T')[0],
             );
-            parcelasController.last[1].text = p.ppr_vlpc.toString();
+            parcelasController.last[1].text = Campo.doubleText(
+              p.ppr_vlpc,
+              '9.999.999,99',
+            );
           }
           recalcular();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _apr_tipoFocus.requestFocus();
+          });
         });
       } else {
         await MSG(context, 'Aviso', 'Registro não encontrado.', 1);
@@ -171,6 +179,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     }
   }
 
+  //===============================================================
   void _addItem() {
     itensController.add([
       TextEditingController(),
@@ -179,7 +188,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
       TextEditingController(),
       TextEditingController(),
     ]);
-
     itensFocus.add([
       FocusNode(),
       FocusNode(),
@@ -189,13 +197,13 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     ]);
   }
 
+  //===============================================================
   void _addParcela() {
     parcelasController.add([
       TextEditingController(),
       TextEditingController(),
       //TextEditingController(),
     ]);
-
     parcelasFocus.add([
       FocusNode(),
       FocusNode(),
@@ -203,32 +211,34 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     ]);
   }
 
+  //===============================================================
   void recalcular() {
     totalItens = 0;
     totalParcelas = 0;
-
     for (var r in itensController) {
-      double qtd = double.tryParse(r[2].text.replaceAll(',', '.')) ?? 0;
-      double vl = double.tryParse(r[3].text.replaceAll(',', '.')) ?? 0;
+      double qtd = Campo.textDouble(r[2].text);
+      double vl = Campo.textDouble(r[3].text);
       double tot = qtd * vl;
-      r[4].text = tot.toStringAsFixed(2);
+      //r[4].text = tot.toStringAsFixed(2);
+      r[4].text = Campo.doubleText(tot, '9.999.999,99');
+
       totalItens += tot;
     }
-
     for (var r in parcelasController) {
-      totalParcelas += double.tryParse(r[1].text.replaceAll(',', '.')) ?? 0;
+      totalParcelas += Campo.textDouble(r[1].text);
     }
-
-    _apr_vltotController.text = totalItens.toStringAsFixed(2);
+    _apr_vltotController.text = Campo.doubleText(totalItens, '9.999.999,99');
 
     setState(() {});
   }
 
+  //===============================================================
   bool get podeGravar =>
-      ((totalItens > 0) &&
+      (totalItens > 0) &&
       (totalParcelas > 0) &&
-      ((totalItens - totalParcelas) == 0));
+      ((totalItens - totalParcelas).abs() < 0.005);
 
+  //===============================================================
   @override
   Widget buildBody(BuildContext context) {
     return Stack(
@@ -271,13 +281,13 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                 _buildTotais(),
                 const SizedBox(height: 12),
                 BotoesFormulario(
-                  //habilitado: podeGravar,
-                  habilitado: _habilitado,
-                  inclusao: _inclusao,
-                  bloqueado: _situ_blq,
-                  onGravar: _gravar,
-                  onExcluir: _excluir,
-                  onCancelar: _cancelar,
+                  onGravar: (!_habilitado && podeGravar && !_situ_blq)
+                      ? _gravar
+                      : null,
+                  onExcluir: (!_habilitado && !_inclusao && !_situ_blq)
+                      ? _excluir
+                      : null,
+                  onCancelar: !_habilitado ? _cancelar : null,
                   focusGravar: _gravarFocus,
                 ),
               ],
@@ -303,6 +313,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     );
   }
 
+  //===============================================================
   Widget _buildCabecalho() {
     return Column(
       children: [
@@ -432,7 +443,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
               controller: _apr_htkmController,
               focusNode: _apr_htkmFocus,
               mascara: '999.999,9',
-              //onSubmitted: _valid_os_htkm,
               nextFocus: _apr_obsFocus,
               enabled: !_habilitado && !_situ_blq,
               onSubmitted: _valid_apr_htkm,
@@ -455,6 +465,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     );
   }
 
+  //===============================================================
   Widget _buildGridItens() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,7 +497,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                 titulo: i == 0 ? 'Descrição' : '',
                 controller: itensController[i][1],
                 focusNode: itensFocus[i][1],
-                tamanho: 15,
+                tamanho: 10,
                 enabled: false,
               ),
 
@@ -507,8 +518,21 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                 controller: itensController[i][3],
                 focusNode: itensFocus[i][3],
                 nextFocus: parcelasFocus[0][0],
-                mascara: '9.999,99',
+                mascara: '99.999,99',
                 onChanged: (_) => recalcular(),
+                onSubmitted: _inclusao
+                    ? () async {
+                        parcelasController[0][0].text = Campo.dataFromPg(
+                          DateTime.now().toIso8601String().split('T')[0],
+                        );
+                        parcelasController[0][1].text = Campo.doubleText(
+                          totalItens,
+                          '9.999.999,99',
+                        );
+                        recalcular();
+                        return true;
+                      }
+                    : null,
                 enabled: !_habilitado && !_situ_blq,
               ),
 
@@ -517,7 +541,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                 titulo: i == 0 ? 'V. Tot. Item' : '',
                 controller: itensController[i][4],
                 focusNode: itensFocus[i][4],
-                mascara: '99.999,99',
+                mascara: '9.999.999,99',
                 enabled: false,
               ),
               if (!_situ_blq)
@@ -541,12 +565,13 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                   setState(() => _addItem());
                 }
               : null,
-          child: const Text("Adicionar Item"),
+          child: const Text("+ Item"),
         ),
       ],
     );
   }
 
+  //===============================================================
   Widget _buildGridParcelas() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,7 +601,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
                 titulo: i == 0 ? 'Valor Parcela' : '',
                 controller: parcelasController[i][1],
                 focusNode: parcelasFocus[i][1],
-                mascara: '99.999,99',
+                mascara: '9.999.999,99',
                 onChanged: (_) => recalcular(),
                 nextFocus: _gravarFocus,
                 enabled: !_habilitado && !_situ_blq,
@@ -594,36 +619,52 @@ class _ForAprState extends BaseFormState<ForAprPage> {
           );
         }),
         const SizedBox(height: 6),
-        ElevatedButton(
-          onPressed: (!_habilitado && !_situ_blq)
-              ? () {
-                  setState(() => _addParcela());
-                }
-              : null,
-          child: const Text("Adicionar Parcela"),
+        Wrap(
+          spacing: 5,
+          runSpacing: 5,
+          children: [
+            ElevatedButton(
+              onPressed: (!_habilitado && !_situ_blq)
+                  ? () {
+                      setState(() => _addParcela());
+                    }
+                  : null,
+              child: const Text("+ Parcela"),
+            ),
+            ElevatedButton(
+              onPressed: (!_habilitado && !_situ_blq && podeGravar)
+                  ? () {
+                      _apr_situController.text = "Quitado";
+                      _gravar();
+                    }
+                  : null,
+              child: const Text("Quitar Tudo"),
+            ),
+          ],
         ),
       ],
     );
   }
 
+  //===============================================================
   Widget _buildTotais() {
     return Row(
       children: [
         Expanded(
           child: Text(
-            "Total Itens: ${totalItens.toStringAsFixed(2)}",
+            "Total Itens:\n${Campo.doubleText(totalItens, '9.999.999,99')}",
             textAlign: TextAlign.left,
           ),
         ),
         Expanded(
           child: Text(
-            "Total Parcelas: ${totalParcelas.toStringAsFixed(2)}",
+            "Total Parcelas:\n${Campo.doubleText(totalParcelas, '9.999.999,99')}",
             textAlign: TextAlign.center,
           ),
         ),
         Expanded(
           child: Text(
-            "Diferença: ${(totalItens - totalParcelas).toStringAsFixed(2)}",
+            "Diferença:\n${Campo.doubleText((totalItens - totalParcelas), '9.999.999,99')}",
             textAlign: TextAlign.right,
           ),
         ),
@@ -655,31 +696,30 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     for (int i = 0; i < itensController.length; i++) {
       var r = itensController[i];
       listaItens.add({
-        "ipr_his": int.tryParse(r[0].text) ?? 0,
-        "ipr_qtd": double.tryParse(r[2].text.replaceAll(',', '.')) ?? 0,
-        "ipr_vlunit": double.tryParse(r[3].text.replaceAll(',', '.')) ?? 0,
-        "ipr_vltoti": double.tryParse(r[4].text.replaceAll(',', '.')) ?? 0,
+        "ipr_his": int.parse(r[0].text),
+        "ipr_qtd": Campo.textDouble(r[2].text),
+        "ipr_vlunit": Campo.textDouble(r[3].text),
+        "ipr_vltoti": Campo.textDouble(r[4].text),
       });
     }
     for (int i = 0; i < parcelasController.length; i++) {
       var r = parcelasController[i];
       listaParcelas.add({
         "ppr_dtv": Campo.dataToPg(r[0].text),
-        "ppr_vlpc": double.tryParse(r[1].text.replaceAll(',', '.')) ?? 0,
+        "ppr_vlpc": Campo.textDouble(r[1].text),
       });
     }
     final cabecalho = {
       "apr_tipo": _apr_tipoController.text,
       "apr_situ": _apr_situController.text,
       "apr_data": Campo.dataToPg(_apr_dataController.text),
-      "apr_tit": int.tryParse(_apr_titController.text) ?? 0,
-      "apr_eqp": int.tryParse(_apr_eqpController.text) ?? 0,
-      "apr_htkm":
-          double.tryParse(_apr_htkmController.text.replaceAll(',', '.')) ?? 0,
+      "apr_tit": int.parse(_apr_titController.text),
+      "apr_eqp": int.parse(_apr_eqpController.text),
+      "apr_htkm": Campo.textDouble(_apr_htkmController.text),
       "apr_obs": _apr_obsController.text,
       "apr_vltot": totalItens,
     };
-    bool quitarTotal = _apr_situController.text == "Quitado";
+    //bool quitarTotal = _apr_situController.text == "Quitado";
     _iniciarCarregamento();
     try {
       if (_inclusao) {
@@ -687,7 +727,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
           cabecalho: cabecalho,
           itens: listaItens,
           parcelas: listaParcelas,
-          quitarTotal: quitarTotal,
+          //quitarTotal: quitarTotal,
         );
       } else {
         await _aprServices.update(
@@ -695,7 +735,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
           cabecalho: cabecalho,
           itens: listaItens,
           parcelas: listaParcelas,
-          quitarTotal: quitarTotal,
+          //quitarTotal: quitarTotal,
         );
       }
       if (!mounted) return;
@@ -1009,10 +1049,10 @@ class _ForAprState extends BaseFormState<ForAprPage> {
 
   //========================[ _valid_apr_tipo ]===========
   Future<bool> _valid_apr_tipo() async {
-    if (_apr_tipoController.text == "OS") {
+    if (_apr_tipoController.text == "OS" || _apr_tipoController.text == "") {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Tipo OS, somente para CONSULTAS.'),
+          content: Text('Tipo OS, deve ser A Pagar ou A Receber.'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -1043,7 +1083,7 @@ class _ForAprState extends BaseFormState<ForAprPage> {
     if (valor <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('O campo HT/KM deve ser informado.'),
+          content: Text('O campo HT/KM deve ser maior que zero.'),
           duration: Duration(seconds: 2),
         ),
       );

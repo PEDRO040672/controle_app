@@ -6,23 +6,18 @@ import 'msg.dart';
 /// BOTÃO PADRÃO FORMULÁRIO [Gravar] [Excluir] [Cancelar]
 /// ======================================================
 class BotoesFormulario extends StatelessWidget {
-  final bool habilitado;
-  final bool inclusao;
-  final VoidCallback onGravar;
-  final Future<void> Function() onExcluir;
-  final VoidCallback onCancelar;
+  /// callbacks opcionais (null = botão desabilitado)
+  final VoidCallback? onGravar;
+  final Future<void> Function()? onExcluir;
+  final VoidCallback? onCancelar;
   final FocusNode? focusGravar;
-  final bool bloqueado;
 
   const BotoesFormulario({
     super.key,
-    required this.habilitado,
-    required this.inclusao,
-    required this.onGravar,
-    required this.onExcluir,
-    required this.onCancelar,
+    this.onGravar,
+    this.onExcluir,
+    this.onCancelar,
     this.focusGravar,
-    this.bloqueado = false,
   });
 
   ButtonStyle _estiloBotao(BuildContext context) {
@@ -44,7 +39,6 @@ class BotoesFormulario extends StatelessWidget {
         }
         return Colors.white;
       }),
-      // 👇 AQUI está a borda dinâmica
       side: WidgetStateProperty.resolveWith<BorderSide?>((states) {
         if (states.contains(WidgetState.hovered) ||
             states.contains(WidgetState.focused) ||
@@ -62,6 +56,7 @@ class BotoesFormulario extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final estiloBotao = _estiloBotao(context);
+
     return Shortcuts(
       shortcuts: {
         LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
@@ -70,8 +65,8 @@ class BotoesFormulario extends StatelessWidget {
         actions: {
           DismissIntent: CallbackAction<DismissIntent>(
             onInvoke: (_) {
-              if (!habilitado) {
-                onCancelar();
+              if (onCancelar != null) {
+                onCancelar!();
               }
               return null;
             },
@@ -87,14 +82,14 @@ class BotoesFormulario extends StatelessWidget {
               ElevatedButton(
                 style: estiloBotao,
                 focusNode: focusGravar,
-                onPressed: !habilitado && !bloqueado ? onGravar : null,
+                onPressed: onGravar,
                 child: const Text('Gravar'),
               ),
 
               /// EXCLUIR
               ElevatedButton(
                 style: estiloBotao,
-                onPressed: (!habilitado && !inclusao && !bloqueado)
+                onPressed: (onExcluir != null)
                     ? () async {
                         bool confirmar = await MSG(
                           context,
@@ -104,7 +99,7 @@ class BotoesFormulario extends StatelessWidget {
                           destrutivo: true,
                         );
                         if (confirmar) {
-                          await onExcluir();
+                          await onExcluir!();
                         }
                       }
                     : null,
@@ -114,10 +109,10 @@ class BotoesFormulario extends StatelessWidget {
               /// CANCELAR
               ElevatedButton(
                 style: estiloBotao,
-                onPressed: !habilitado
+                onPressed: (onCancelar != null)
                     ? () {
-                        FocusScope.of(context).unfocus(); // 👈 ADICIONE ISSO
-                        onCancelar();
+                        FocusScope.of(context).unfocus();
+                        onCancelar!();
                       }
                     : null,
                 child: const Text('Cancelar'),

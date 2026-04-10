@@ -37,6 +37,15 @@ class _ConsultaCadhisState extends BaseConsState<ConsultaCadhis> {
   int _selectedIndex = -1;
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      filtroFocus.requestFocus();
+    });
+  }
+
+  @override
   void dispose() {
     _filtroController.dispose();
     _vertical.dispose();
