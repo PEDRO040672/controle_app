@@ -154,7 +154,7 @@ class _MenuPageState extends State<MenuPage> {
             child: const DrawerHeader(
               child: Center(
                 child: Text(
-                  'Controle',
+                  'Menu Controle',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -292,7 +292,7 @@ class _MenuPageState extends State<MenuPage> {
   /// ============================
   Widget _buildMDI() {
     if (_modulosAbertos.isEmpty) {
-      final bool isDesktop = MediaQuery.of(context).size.width >= 900;
+      final bool isDesktop = MediaQuery.of(context).size.width >= 400;
       if (isDesktop) {
         // TELA GRANDE → mostra texto
         return const Center(
@@ -302,12 +302,15 @@ class _MenuPageState extends State<MenuPage> {
           ),
         );
       } else {
-        // MOBILE → mostra ícone central
-        return Center(
-          child: Icon(
-            Icons.business,
-            size: 120,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/img_fundo.png'),
+              //fit: BoxFit.contain,
+              fit: BoxFit.cover,
+            ),
           ),
         );
       }
@@ -348,12 +351,18 @@ class _MenuPageState extends State<MenuPage> {
           Container(
             width: 200,
             color: Theme.of(context).colorScheme.primary,
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
+              //mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.business, size: 90, color: Colors.white70),
-                SizedBox(height: 20),
-                Text(
+                Image.asset(
+                  'assets/images/img_fundo.png',
+                  width: double.infinity,
+                  //fit: BoxFit.contain,
+                  fit: BoxFit.cover,
+                  opacity: const AlwaysStoppedAnimation(0.7),
+                ),
+                const SizedBox(height: 20),
+                const Text(
                   'Controle\nAdministrativo',
                   textAlign: TextAlign.center,
                   style: TextStyle(

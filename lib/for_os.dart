@@ -402,6 +402,12 @@ TOTAL: R\$ ${_os_vltotsController.text}
       }
       if (cadeqp != null) {
         _eqp_descController.text = cadeqp.eqp_desc;
+        if (_inclusao) {
+          _os_htkmiController.text = Campo.doubleText(
+            cadeqp.eqp_htkm,
+            '999.999,9',
+          );
+        }
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _os_opeFocus.requestFocus();
         });
@@ -812,6 +818,19 @@ TOTAL: R\$ ${_os_vltotsController.text}
     return true;
   }
 
+  //===============================================================
+  void recalcular() {
+    final htkmi = Campo.textDouble(_os_htkmiController.text);
+    final htkmf = Campo.textDouble(_os_htkmfController.text);
+    final qtd = htkmf - htkmi;
+    final vldesc = Campo.textDouble(_os_vldescController.text);
+    final vlunit = Campo.textDouble(_os_vlunitController.text);
+    final tots = ((qtd * vlunit) - vldesc);
+    _os_qtdController.text = Campo.doubleText(qtd, '999.999,9');
+    _os_vltotsController.text = Campo.doubleText(tots, '999.999,99');
+    setState(() {});
+  }
+
   // ============================================================
   // UI
   // ============================================================
@@ -1093,6 +1112,7 @@ TOTAL: R\$ ${_os_vltotsController.text}
                       focusNode: _os_htkmiFocus,
                       mascara: '999.999,9',
                       onSubmitted: _valid_os_htkmi,
+                      onChanged: (_) => recalcular(),
                       nextFocus: _os_htkmfFocus,
                       enabled: !_habilitado && !_situ_blq,
                     ),
@@ -1104,6 +1124,7 @@ TOTAL: R\$ ${_os_vltotsController.text}
                       focusNode: _os_htkmfFocus,
                       mascara: '999.999,9',
                       onSubmitted: _valid_os_htkmf,
+                      onChanged: (_) => recalcular(),
                       nextFocus: _os_vlunitFocus,
                       enabled: !_habilitado && !_situ_blq,
                     ),
@@ -1128,6 +1149,7 @@ TOTAL: R\$ ${_os_vltotsController.text}
                       focusNode: _os_vlunitFocus,
                       mascara: '999.999,99',
                       onSubmitted: _valid_os_vlunit,
+                      onChanged: (_) => recalcular(),
                       nextFocus: _os_vldescFocus,
                       enabled: !_habilitado && !_situ_blq,
                     ),
@@ -1144,6 +1166,7 @@ TOTAL: R\$ ${_os_vltotsController.text}
                       focusNode: _os_vldescFocus,
                       mascara: '999.999,99',
                       onSubmitted: _valid_os_vldesc,
+                      onChanged: (_) => recalcular(),
                       nextFocus: _gravarFocus,
                       enabled: !_habilitado && !_situ_blq,
                     ),

@@ -893,6 +893,13 @@ class _ForAprState extends BaseFormState<ForAprPage> {
       }
       if (cadeqp != null) {
         _eqp_descController.text = cadeqp.eqp_desc;
+        if (_inclusao) {
+          _apr_htkmController.text = Campo.doubleText(
+            cadeqp.eqp_htkm,
+            '999.999,9',
+          );
+        }
+
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _apr_htkmFocus.requestFocus();
         });
