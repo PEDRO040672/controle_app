@@ -135,7 +135,9 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
         }
 
         if (nome.isNotEmpty) {
-          ok &= (p.tit_nome ?? '').toLowerCase().contains(nome);
+          ok &=
+              (p.tit_nome.toLowerCase().contains(nome) ||
+              p.eqp_desc.toLowerCase().contains(nome));
         }
 
         if (situ != 'Todas') {
@@ -220,12 +222,13 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
           controller: _situacaoController,
           focusNode: _situacaoFocus,
           nextFocus: _titularFocus,
-          lista: 'Todas,Aberto,Fechado,Quitado,Parcial',
+          //lista: 'Todas,Aberto,Fechado,Quitado,Parcial',
+          lista: 'Todas,Ñ Quitado,Quitado,Parcial',
           onChanged: (_) => _filtrar(),
         ),
         Campo(
           tipo: TipoCampo.texto,
-          titulo: 'Titular',
+          titulo: 'Titular/Eqpto',
           controller: _titularController,
           focusNode: _titularFocus,
           nextFocus: _dataIniFocus,
@@ -327,7 +330,7 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
             DataCell(Text(formatoData.format(p.apr_data))),
             DataCell(
               Text(
-                p.tit_nome ?? '',
+                p.tit_nome,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 softWrap: false,
@@ -335,7 +338,7 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
             ),
             DataCell(
               Text(
-                p.eqp_desc ?? '',
+                p.eqp_desc,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 softWrap: false,

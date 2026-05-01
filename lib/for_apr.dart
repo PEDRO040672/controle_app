@@ -199,16 +199,8 @@ class _ForAprState extends BaseFormState<ForAprPage> {
 
   //===============================================================
   void _addParcela() {
-    parcelasController.add([
-      TextEditingController(),
-      TextEditingController(),
-      //TextEditingController(),
-    ]);
-    parcelasFocus.add([
-      FocusNode(),
-      FocusNode(),
-      //FocusNode()
-    ]);
+    parcelasController.add([TextEditingController(), TextEditingController()]);
+    parcelasFocus.add([FocusNode(), FocusNode()]);
   }
 
   //===============================================================
@@ -219,7 +211,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
       double qtd = Campo.textDouble(r[2].text);
       double vl = Campo.textDouble(r[3].text);
       double tot = qtd * vl;
-      //r[4].text = tot.toStringAsFixed(2);
       r[4].text = Campo.doubleText(tot, '9.999.999,99');
 
       totalItens += tot;
@@ -727,7 +718,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
           cabecalho: cabecalho,
           itens: listaItens,
           parcelas: listaParcelas,
-          //quitarTotal: quitarTotal,
         );
       } else {
         await _aprServices.update(
@@ -735,7 +725,6 @@ class _ForAprState extends BaseFormState<ForAprPage> {
           cabecalho: cabecalho,
           itens: listaItens,
           parcelas: listaParcelas,
-          //quitarTotal: quitarTotal,
         );
       }
       if (!mounted) return;

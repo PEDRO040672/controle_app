@@ -4,9 +4,9 @@ class Cadapr {
   final String apr_situ;
   final DateTime apr_data;
   final int apr_tit;
-  final String? tit_nome;
+  final String tit_nome;
   final int apr_eqp;
-  final String? eqp_desc;
+  final String eqp_desc;
   final double apr_htkm;
   final String apr_obs;
   final double apr_vltot;
@@ -20,9 +20,9 @@ class Cadapr {
     required this.apr_situ,
     required this.apr_data,
     required this.apr_tit,
-    this.tit_nome,
+    required this.tit_nome,
     required this.apr_eqp,
-    this.eqp_desc,
+    required this.eqp_desc,
     required this.apr_htkm,
     required this.apr_obs,
     required this.apr_vltot,

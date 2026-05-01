@@ -128,7 +128,11 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
         bool ok = true;
 
         if (nome.isNotEmpty) {
-          ok &= p.tit_nome.toLowerCase().contains(nome);
+          ok &=
+              (p.his_desc.toLowerCase().contains(nome) ||
+              p.cid_nome.toLowerCase().contains(nome) ||
+              p.tit_nome.toLowerCase().contains(nome) ||
+              p.eqp_desc.toLowerCase().contains(nome));
         }
 
         if (situ.isNotEmpty && situ != 'Todas') {
@@ -158,10 +162,6 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
     _situacaoController.text = 'Todas';
     _dataIniController.clear();
     _dataFimController.clear();
-    //final hoje = DateTime.now();
-    //final dataInicial = DateTime(hoje.year, hoje.month, 1);
-    //_dataIniController.text = DateFormat('dd/MM/yyyy').format(dataInicial);
-    //_dataFimController.text = DateFormat('dd/MM/yyyy').format(hoje);
     _filtrar();
   }
 
@@ -205,7 +205,7 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
       children: [
         Campo(
           tipo: TipoCampo.texto,
-          titulo: 'Titular',
+          titulo: 'Histórico/Cidade/Titular/Eqpto',
           controller: _titularController,
           focusNode: _titularFocus,
           nextFocus: _situacaoFocus,
