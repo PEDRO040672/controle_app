@@ -16,6 +16,7 @@ class Campo extends StatelessWidget {
   final String? lista;
 
   final int tamanho;
+  final double? largura;
   final bool zeroEsquerda;
   final String? mascara;
   final bool enabled;
@@ -32,6 +33,7 @@ class Campo extends StatelessWidget {
     this.onSubmitted,
     this.onChanged,
     this.tamanho = 50,
+    this.largura,
     this.zeroEsquerda = false,
     this.mascara,
     this.enabled = true,
@@ -212,7 +214,8 @@ class Campo extends StatelessWidget {
           .toList();
 
       return SizedBox(
-        width: _largura(context) + 30,
+        //width: _largura(context) + 30,
+        width: largura ?? (_largura(context) + 30),
         child: DropdownButtonFormField<String>(
           value: controller.text.isEmpty ? null : controller.text,
           focusNode: focusNode,
@@ -241,7 +244,8 @@ class Campo extends StatelessWidget {
     return GestureDetector(
       onDoubleTap: enabled ? onDoubleTap : null,
       child: SizedBox(
-        width: _largura(context),
+        //width: _largura(context),
+        width: largura ?? _largura(context),
         child: TextField(
           focusNode: focusNode,
           autofocus: autofocus,

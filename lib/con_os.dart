@@ -216,7 +216,8 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
           controller: _titularController,
           focusNode: _titularFocus,
           nextFocus: _situacaoFocus,
-          tamanho: 24,
+          tamanho: 50,
+          largura: 300,
           onChanged: (_) => _filtrar(),
         ),
         Campo(

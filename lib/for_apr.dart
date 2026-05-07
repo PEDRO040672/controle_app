@@ -133,9 +133,9 @@ class _ForAprState extends BaseFormState<ForAprPage> {
             cad.apr_data.toIso8601String().split('T')[0],
           );
           _apr_titController.text = cad.apr_tit.toString();
-          _tit_nomeController.text = cad.tit_nome ?? '';
+          _tit_nomeController.text = cad.tit_nome;
           _apr_eqpController.text = cad.apr_eqp.toString();
-          _eqp_descController.text = cad.eqp_desc ?? '';
+          _eqp_descController.text = cad.eqp_desc;
           _apr_htkmController.text = Campo.doubleText(
             cad.apr_htkm,
             '999.999,9',

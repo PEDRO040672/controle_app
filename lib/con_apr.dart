@@ -239,7 +239,8 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
           controller: _titularController,
           focusNode: _titularFocus,
           nextFocus: _dataIniFocus,
-          tamanho: 15,
+          tamanho: 50,
+          largura: 160,
           onChanged: (_) => _filtrar(),
         ),
         Campo(
