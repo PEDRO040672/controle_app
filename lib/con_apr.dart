@@ -135,9 +135,16 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
         }
 
         if (nome.isNotEmpty) {
-          ok &=
-              (p.tit_nome.toLowerCase().contains(nome) ||
-              p.eqp_desc.toLowerCase().contains(nome));
+          final filtros = nome
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
+          ok &= filtros.every(
+            (filtro) =>
+                p.tit_nome.toLowerCase().contains(filtro) ||
+                p.eqp_desc.toLowerCase().contains(filtro),
+          );
         }
 
         if (situ != 'Todas') {
@@ -228,7 +235,7 @@ class _ConsultaCadaprState extends BaseConsState<ConsultaCadapr> {
         ),
         Campo(
           tipo: TipoCampo.texto,
-          titulo: 'Titular/Eqpto',
+          titulo: 'Titular,Eqpto',
           controller: _titularController,
           focusNode: _titularFocus,
           nextFocus: _dataIniFocus,

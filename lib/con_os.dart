@@ -128,11 +128,18 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
         bool ok = true;
 
         if (nome.isNotEmpty) {
-          ok &=
-              (p.his_desc.toLowerCase().contains(nome) ||
-              p.cid_nome.toLowerCase().contains(nome) ||
-              p.tit_nome.toLowerCase().contains(nome) ||
-              p.eqp_desc.toLowerCase().contains(nome));
+          final filtros = nome
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
+          ok &= filtros.every(
+            (filtro) =>
+                p.his_desc.toLowerCase().contains(filtro) ||
+                p.cid_nome.toLowerCase().contains(filtro) ||
+                p.tit_nome.toLowerCase().contains(filtro) ||
+                p.eqp_desc.toLowerCase().contains(filtro),
+          );
         }
 
         if (situ.isNotEmpty && situ != 'Todas') {
@@ -205,7 +212,7 @@ class _ConsultaCadosState extends BaseConsState<ConsultaCados> {
       children: [
         Campo(
           tipo: TipoCampo.texto,
-          titulo: 'Histórico/Cidade/Titular/Eqpto',
+          titulo: 'Histórico,Cidade,Titular,Eqpto',
           controller: _titularController,
           focusNode: _titularFocus,
           nextFocus: _situacaoFocus,
